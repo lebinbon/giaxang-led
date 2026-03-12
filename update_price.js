@@ -56,47 +56,41 @@ const createHTML = (vung) => `
         body { 
             margin:0; 
             background: transparent; 
-            color:#FFD700; /* Màu vàng đặc trưng Petrolimex */
-            font-family: "Arial Black", Gadget, sans-serif; /* Dùng font dày để đổ bóng đẹp hơn */
-            font-size: 30px; 
+            color:#FFD700; 
+            font-family: "Arial Narrow", Arial, sans-serif; /* Dùng font hẹp để tiết kiệm diện tích */
+            font-size: 24px; /* Hạ từ 32px xuống 24px để vừa hàng ngang */
             font-weight: bold; 
             overflow: hidden; 
             white-space: nowrap;
-            /* Đổ bóng 4 hướng giúp chữ cực kỳ sắc nét trên mọi loại nền video/ảnh */
-            text-shadow: 
-                2px 2px 0px #000, 
-                -2px -2px 0px #000, 
-                2px -2px 0px #000, 
-                -2px 2px 0px #000,
-                4px 4px 8px rgba(0,0,0,1); 
+            text-shadow: 1px 1px 2px #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
         }
         .container { 
             width: 1872px; 
             height: 82px; 
             display: flex; 
             align-items: center; 
-            justify-content: center; 
-            padding: 0 20px; 
+            justify-content: space-between; /* Chia đều khoảng cách */
+            padding: 0 15px; 
             box-sizing: border-box; 
         }
-        .label { color: #FFFFFF; margin-right: 20px; } /* Chữ "GIÁ BÁN LẺ" màu trắng */
-        .separator { color: #FFFFFF; margin: 0 30px; font-weight: normal; } /* Dấu gạch đứng màu trắng */
-        .price-value { color: #00FF00; } /* Số tiền màu xanh lá cho nổi bật */
+        .label { color: #FFFFFF; }
+        .separator { color: #FFFFFF; margin: 0 10px; }
+        .price-value { color: #00FF00; }
     </style></head>
     <body>
         <div class="container">
             <span class="label">GIÁ BÁN LẺ (Đ/L):</span>
             
-            <span>XĂNG RON 95 MỨC 3: <span class="price-value">${data.RON95_III}</span></span>
+            <span>RON 95-III: <span class="price-value">${data.RON95_III}</span></span>
             <span class="separator">|</span>
             
-            <span>XĂNG E5 RON 92 MỨC 2: <span class="price-value">${data.E5}</span></span>
+            <span>E5 RON 92-II: <span class="price-value">${data.E5}</span></span>
             <span class="separator">|</span>
             
-            <span>DẦU DO 0,001 MỨC 5: <span class="price-value">${data.DO_001}</span></span>
+            <span>DO 0,001S-V: <span class="price-value">${data.DO_001}</span></span>
             <span class="separator">|</span>
             
-            <span>DẦU DO 0,05S MỨC 2: <span class="price-value">${data.DO_05}</span></span>
+            <span>DO 0,05S-II: <span class="price-value">${data.DO_05}</span></span>
         </div>
     </body>
     </html>`;
