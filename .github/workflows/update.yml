@@ -15,18 +15,13 @@ jobs:
 
     steps:
 
-      - name: Checkout repo
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 18
-
-      - name: Install dependencies
-        run: |
-          npm init -y
-          npm install axios cheerio
 
       - name: Run script
         run: node update_price.js
