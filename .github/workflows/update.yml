@@ -1,35 +1,38 @@
-name: Update fuel price
+name: update fuel price
 
 on:
-  schedule:
-    - cron: "*/10 * * * *"
-  workflow_dispatch:
-
-permissions:
-  contents: write
+ schedule:
+  - cron: "*/10 * * * *"
+ workflow_dispatch:
 
 jobs:
-  update:
+ update:
 
-    runs-on: ubuntu-latest
+  runs-on: ubuntu-latest
 
-    steps:
+  steps:
 
-      - name: Checkout
-        uses: actions/checkout@v4
+  - name: Checkout
+    uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
+  - name: Setup Node
+    uses: actions/setup-node@v4
+    with:
+      node-version: 20
 
-      - name: Run script
-        run: node update_price.js
+  - name: Install packages
+    run: npm install
 
-      - name: Commit update
-        run: |
-          git config user.name github-actions
-          git config user.email actions@github.com
-          git add price.json
-          git commit -m "update fuel price" || echo "no change"
-          git push
+  - name: Install browser
+    run: npx playwright install chromium
+
+  - name: Update price
+    run: node update_price.js
+
+  - name: Commit
+    run: |
+      git config --global user.name "github-actions"
+      git config --global user.email "actions@github.com"
+      git add price.json
+      git commit -m "update price" || echo "no change"
+      git push
