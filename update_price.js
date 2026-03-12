@@ -1,40 +1,60 @@
-const https = require("https");
 const fs = require("fs");
+const { chromium } = require("playwright");
 
-const url = "https://www.petrolimex.com.vn/api/petrolprice";
+(async () => {
 
-https.get(url, (res) => {
+const browser = await chromium.launch();
+const page = await browser.newPage();
 
-let data = "";
+await page.goto("https://petrolimex.com.vn", { waitUntil: "networkidle" });
 
-res.on("data", chunk => data += chunk);
+// hover vào menu để hiện bảng giá
+await page.hover('a[href="/#"]');
 
-res.on("end", () => {
+await page.waitForTimeout(3000);
 
-const json = JSON.parse(data);
+// lấy bảng giá
+const data = await page.evaluate(() => {
 
-const price = {
-ron95: json.find(x => x.name.includes("RON 95")).price1,
-e5: json.find(x => x.name.includes("E5")).price1,
-do001: json.find(x => x.name.includes("DO 0,001")).price1,
-do005: json.find(x => x.name.includes("DO 0,05")).price1
+const rows = Array.from(document.querySelectorAll("table tr"));
+
+let price = {
+ron95:"00.000",
+e5:"00.000",
+do001:"00.000",
+do005:"00.000"
 };
 
-function format(v){
-return v.toString().replace(/\B(?=(\d{3})+(?!\d))/g,".");
+rows.forEach(r=>{
+
+const text = r.innerText;
+
+if(text.includes("RON 95") && !price.ron95){
+price.ron95 = r.children[1].innerText;
 }
 
-const result = {
-ron95: format(price.ron95),
-e5: format(price.e5),
-do001: format(price.do001),
-do005: format(price.do005)
-};
+if(text.includes("E5") && !price.e5){
+price.e5 = r.children[1].innerText;
+}
 
-fs.writeFileSync("price.json",JSON.stringify(result,null,2));
+if(text.includes("DO 0,001") && !price.do001){
+price.do001 = r.children[1].innerText;
+}
 
-console.log(result);
+if(text.includes("DO 0,05") && !price.do005){
+price.do005 = r.children[1].innerText;
+}
 
 });
 
+return price;
+
 });
+
+fs.writeFileSync("price.json",JSON.stringify(data,null,2));
+
+console.log(data);
+
+await browser.close();
+
+})();
