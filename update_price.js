@@ -47,43 +47,47 @@ const createHTML = (dataV) => `
     <head>
         <meta charset='utf-8'>
         <style>
-            /* Ép toàn bộ trang web không có lề và cao bằng ô Widget */
             html, body { 
                 margin: 0; padding: 0; width: 100%; height: 100%; 
-                background: transparent; overflow: hidden; 
+                background: black; /* Để nền đen cho đỡ lộ viền trên LED */
+                overflow: hidden; 
+                display: flex; align-items: center; justify-content: center;
             }
-            svg {
-                width: 100%; 
-                height: 100%;
-                display: block;
-                /* preserveAspectRatio: none sẽ ép chữ giãn ra cho vừa khít ô ngang/dọc */
-                preserveAspectRatio: none; 
-            }
-            .text-main {
+            .led-table {
+                width: 100%;
+                display: table;
+                table-layout: fixed; /* Ép các cột phải chia đều diện tích */
+                border-collapse: collapse;
                 font-family: "Arial Narrow", Arial, sans-serif;
                 font-weight: bold;
+                text-align: center;
             }
+            .cell {
+                display: table-cell;
+                vertical-align: middle;
+                white-space: nowrap;
+                /* Font size tính theo đơn vị 'vmin' để tự co dãn theo chiều nhỏ nhất */
+                font-size: 70vmin; 
+            }
+            .product { color: #FFD700; }
+            .price { color: #00FF00; margin-left: 2px; }
+            .sep { color: #FFFFFF; opacity: 0.5; }
         </style>
     </head>
     <body>
-        <svg viewBox="0 0 1200 100" xmlns="http://www.w3.org/2000/01/svg">
-            <text x="50%" y="70" text-anchor="middle" class="text-main" style="font-size: 75px;">
-                <tspan fill="#FFFFFF">GIÁ BÁN LẺ (Đ/L): </tspan>
-                
-                <tspan fill="#FFD700">95-III:</tspan>
-                <tspan fill="#00FF00"> ${dataV.p95}</tspan>
-                
-                <tspan fill="#FFFFFF" opacity="0.6"> | </tspan>
-                
-                <tspan fill="#FFD700">DO-V:</tspan>
-                <tspan fill="#00FF00"> ${dataV.do001}</tspan>
-                
-                <tspan fill="#FFFFFF" opacity="0.6"> | </tspan>
-                
-                <tspan fill="#FFD700">DO-II:</tspan>
-                <tspan fill="#00FF00"> ${dataV.do05}</tspan>
-            </text>
-        </svg>
+        <div class="led-table">
+            <div class="cell">
+                <span class="product">95:</span><span class="price">${dataV.p95}</span>
+            </div>
+            <div class="cell"><span class="sep">|</span></div>
+            <div class="cell">
+                <span class="product">DV:</span><span class="price">${dataV.do001}</span>
+            </div>
+            <div class="cell"><span class="sep">|</span></div>
+            <div class="cell">
+                <span class="product">DII:</span><span class="price">${dataV.do05}</span>
+            </div>
+        </div>
     </body>
     </html>`;
 
