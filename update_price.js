@@ -49,13 +49,30 @@ const fs = require('fs');
     data.DO_001 = findPrice("DO 0,001S-V");
     data.DO_05 = findPrice("DO 0,05S-II");
 
-    const createHTML = (vung) => `
+const createHTML = (vung) => `
     <!DOCTYPE html>
     <html>
     <head><meta charset='utf-8'><style>
-        body { margin:0; background: black; color:#FFD700; font-family:Arial; font-size:28px; font-weight:bold; overflow:hidden; }
-        .container { width:1872px; height:82px; display:flex; align-items:center; justify-content: space-around; padding: 0 10px; box-sizing: border-box; }
-        .highlight { color: white; } .oil { color: #00FF00; }
+        body { 
+            margin:0; 
+            background: transparent; /* Đổi từ black sang transparent */
+            color:#FFD700; 
+            font-family:Arial; 
+            font-size:28px; 
+            font-weight:bold; 
+            overflow:hidden; 
+        }
+        .container { 
+            width:1872px; 
+            height:82px; 
+            display:flex; 
+            align-items:center; 
+            justify-content: space-around; 
+            padding: 0 10px; 
+            box-sizing: border-box; 
+        }
+        .highlight { color: white; } 
+        .oil { color: #00FF00; }
     </style></head>
     <body><div class="container">
         <span><span class="highlight">GIÁ PETROLIMEX:</span></span>
