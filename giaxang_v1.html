@@ -6,40 +6,42 @@
             margin:0; 
             background: transparent; 
             color:#FFD700; 
-            font-family: "Arial Narrow", Arial, sans-serif; /* Dùng font hẹp để tiết kiệm diện tích */
-            font-size: 24px; /* Hạ từ 32px xuống 24px để vừa hàng ngang */
+            font-family: "Arial Narrow", Arial, sans-serif; 
+            font-size: 25px; /* Kích thước vừa vặn */
             font-weight: bold; 
             overflow: hidden; 
             white-space: nowrap;
-            text-shadow: 1px 1px 2px #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+            /* Đổ bóng để nổi bật trên nền trong suốt */
+            text-shadow: 2px 2px 3px #000;
+            letter-spacing: -0.5px; /* Thu hẹp khoảng cách chữ một chút để đủ chỗ */
         }
         .container { 
             width: 1872px; 
             height: 82px; 
             display: flex; 
             align-items: center; 
-            justify-content: space-between; /* Chia đều khoảng cách */
-            padding: 0 15px; 
+            justify-content: space-between; 
+            padding: 0 10px; 
             box-sizing: border-box; 
         }
         .label { color: #FFFFFF; }
-        .separator { color: #FFFFFF; margin: 0 10px; }
+        .separator { color: #FFFFFF; margin: 0 5px; }
         .price-value { color: #00FF00; }
     </style></head>
     <body>
         <div class="container">
             <span class="label">GIÁ BÁN LẺ (Đ/L):</span>
             
-            <span>RON 95-III: <span class="price-value">25.240</span></span>
+            <span>XĂNG RON 95-III: <span class="price-value">25.240</span></span>
             <span class="separator">|</span>
             
-            <span>E5 RON 92-II: <span class="price-value">22.950</span></span>
+            <span>XĂNG E5 RON 92-II: <span class="price-value">22.950</span></span>
             <span class="separator">|</span>
             
-            <span>DO 0,001S-V: <span class="price-value">26.670</span></span>
+            <span>DẦU DO 0,001S-V: <span class="price-value">26.670</span></span>
             <span class="separator">|</span>
             
-            <span>DO 0,05S-II: <span class="price-value">26.470</span></span>
+            <span>DẦU DO 0,05S-II: <span class="price-value">26.470</span></span>
         </div>
     </body>
     </html>
