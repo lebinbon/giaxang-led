@@ -1,73 +1,15 @@
-<!DOCTYPE html>
-<html>
-<head>
 
-<meta charset="utf-8">
-
-<style>
-
-body{
-margin:0;
-background:#666;
-font-family:Arial;
-}
-
-#banner{
-width:100%;
-height:60px;
-display:flex;
-align-items:center;
-color:white;
-font-size:28px;
-font-weight:bold;
-}
-
-.item{
-margin-left:40px;
-}
-
-.ron{
-color:#ffd800;
-}
-
-.dau{
-color:#00ff66;
-}
-
-</style>
-
-</head>
-
-<body>
-
-<div id="banner">
-
-<div class="item">BẢNG GIÁ PETROLIMEX</div>
-
-<div class="item ron">RON95: <span id="ron95">00.000</span></div>
-
-<div class="item ron">E5: <span id="e5">00.000</span></div>
-
-<div class="item dau">DO 0.001: <span id="do001">00.000</span></div>
-
-<div class="item dau">DO 0.05: <span id="do005">00.000</span></div>
-
-</div>
-
-<script>
-
-fetch("price.json")
-.then(r=>r.json())
-.then(d=>{
-
-document.getElementById("ron95").innerText=d.ron95
-document.getElementById("e5").innerText=d.e5
-document.getElementById("do001").innerText=d.do001
-document.getElementById("do005").innerText=d.do005
-
-})
-
-</script>
-
-</body>
-</html>
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset='utf-8'><style>
+        body { margin:0; background: black; color:#FFD700; font-family:Arial; font-size:28px; font-weight:bold; overflow:hidden; }
+        .container { width:1872px; height:82px; display:flex; align-items:center; justify-content: space-around; padding: 0 10px; box-sizing: border-box; }
+        .highlight { color: white; } .oil { color: #00FF00; }
+    </style></head>
+    <body><div class="container">
+        <span><span class="highlight">GIÁ PETROLIMEX:</span></span>
+        <span><span class="highlight">95-III:</span> 25.240</span>
+        <span><span class="highlight">E5-92:</span> 22.950</span>
+        <span><span class="highlight">DO 0,001:</span> <span class="oil">26.670</span></span>
+        <span><span class="highlight">DO 0,05:</span> <span class="oil">26.470</span></span>
+    </div></body></html>
