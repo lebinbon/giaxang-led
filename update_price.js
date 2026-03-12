@@ -41,7 +41,7 @@ const fs = require('fs');
     const v1 = { p95: p95.v1, do001: do001.v1, do05: do05.v1 };
 
     // HÀM TẠO HTML TỰ CO GIÃN THEO KHUNG HÌNH (VIEWPORT)
-   const createHTML = (dataV) => `
+const createHTML = (dataV) => `
     <!DOCTYPE html>
     <html>
     <head>
