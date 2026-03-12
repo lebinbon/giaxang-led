@@ -11,21 +11,28 @@ jobs:
 
     steps:
 
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
+      - name: Install Playwright
+        run: |
+          npm init -y
+          npm install playwright
+
+      - name: Install browsers
+        run: npx playwright install
+
       - name: Run script
         run: node update_price.js
 
       - name: Commit update
         run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
+          git config user.name github-actions
+          git config user.email actions@github.com
           git add .
-          git commit -m "update fuel price" || echo "no change"
+          git commit -m "update price" || echo "no change"
           git push
