@@ -1,37 +1,50 @@
-const axios = require("axios");
-const cheerio = require("cheerio");
+const https = require("https");
 const fs = require("fs");
 
-async function getPrice() {
+function getHTML() {
+  return new Promise((resolve, reject) => {
 
-const url = "https://www.petrolimex.com.vn";
+    https.get("https://www.petrolimex.com.vn/", (res) => {
 
-const { data } = await axios.get(url);
+      let data = "";
 
-const text = data.replace(/\s+/g," ");
+      res.on("data", chunk => data += chunk);
 
-function find(keyword){
+      res.on("end", () => resolve(data));
 
-const r = new RegExp(keyword + ".*?(\\d{2}\\.\\d{3})");
-const m = text.match(r);
+    }).on("error", reject);
 
-return m ? m[1] : "00.000";
+  });
+}
+
+function findPrice(text, keyword) {
+
+  const r = new RegExp(keyword + ".*?(\\d{2}\\.\\d{3})");
+  const m = text.match(r);
+
+  return m ? m[1] : "00.000";
 
 }
 
-const price = {
+async function run() {
 
-ron95: find("RON 95"),
-e5: find("E5"),
-do001: find("0,001"),
-do005: find("0,05")
+  const html = await getHTML();
 
-};
+  const text = html.replace(/\s+/g," ");
 
-fs.writeFileSync("price.json", JSON.stringify(price,null,2));
+  const price = {
 
-console.log(price);
+    ron95: findPrice(text,"RON 95"),
+    e5: findPrice(text,"E5"),
+    do001: findPrice(text,"0,001"),
+    do005: findPrice(text,"0,05")
+
+  };
+
+  fs.writeFileSync("price.json", JSON.stringify(price,null,2));
+
+  console.log(price);
 
 }
 
-getPrice();
+run();
