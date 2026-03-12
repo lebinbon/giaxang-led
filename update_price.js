@@ -1,7 +1,7 @@
-const { chromium } = require('playwright');
-const fs = require('fs');
+const { chromium } = require("playwright");
+const fs = require("fs");
 
-async function layGia(){
+async function run(){
 
 const browser = await chromium.launch();
 const page = await browser.newPage();
@@ -39,18 +39,16 @@ return "00.000";
 }
 
 const data = {
-
 ron95: findPrice("RON 95"),
 e5: findPrice("E5"),
 do001: findPrice("DO 0,001")
-
 };
 
 const html = `
 <!DOCTYPE html>
 <html>
 <meta charset="utf-8">
-<body style="background:black;color:yellow;font-size:30px;font-family:Arial">
+<body style="background:black;color:#FFD700;font-size:32px;font-family:Arial">
 
 GIÁ XĂNG PETROLIMEX VÙNG 1
 
@@ -70,4 +68,4 @@ await browser.close();
 
 }
 
-layGia();
+run();
