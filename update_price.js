@@ -1,57 +1,107 @@
-const { chromium } = require("playwright");
+const https = require("https");
 const fs = require("fs");
 
-async function run() {
+const PRICE_FILE = "last_price.json";
 
-  const browser = await chromium.launch({
-    headless: true
-  });
+function fetchPrice() {
 
-  const page = await browser.newPage();
+return new Promise((resolve,reject)=>{
 
-  await page.goto("https://www.petrolimex.com.vn", {
-    timeout: 120000,
-    waitUntil: "domcontentloaded"
-  });
+https.get("https://www.petrolimex.com.vn",res=>{
 
-  await page.waitForTimeout(5000);
+let data="";
 
-  const text = await page.textContent("body");
+res.on("data",chunk=>data+=chunk);
 
-  function findPrice(keyword) {
-    const regex = new RegExp(keyword + ".*?(\\d{2}\\.\\d{3})");
-    const match = text.match(regex);
-    return match ? match[1] : "00.000";
-  }
+res.on("end",()=>{
 
-  const ron95 = findPrice("RON95");
-  const e5 = findPrice("E5");
+function find(keyword){
 
-  console.log("RON95:", ron95);
-  console.log("E5:", e5);
+const regex=new RegExp(keyword+".*?(\\d{2}\\.\\d{3})");
+const match=data.match(regex);
+return match?match[1]:"00.000";
 
-  const html1 = `
+}
+
+const e5=find("E5");
+const ron95=find("RON 95");
+
+resolve({e5,ron95});
+
+});
+
+}).on("error",reject);
+
+});
+
+}
+
+async function run(){
+
+const price=await fetchPrice();
+
+let last={};
+
+if(fs.existsSync(PRICE_FILE)){
+last=JSON.parse(fs.readFileSync(PRICE_FILE));
+}
+
+if(price.e5===last.e5 && price.ron95===last.ron95){
+console.log("No price change");
+return;
+}
+
+fs.writeFileSync(PRICE_FILE,JSON.stringify(price));
+
+const html=`
 <html>
-<body style="background:black;color:red;font-size:60px;text-align:center;">
-E5: ${e5}<br>
-RON95: ${ron95}
+<head>
+<meta charset="UTF-8">
+<style>
+
+body{
+background:black;
+color:red;
+font-family:Arial;
+text-align:center;
+}
+
+.box{
+margin-top:120px;
+}
+
+.line{
+font-size:120px;
+font-weight:bold;
+margin:40px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="box">
+
+<div class="line">
+E5 RON92 : ${price.e5}
+</div>
+
+<div class="line">
+RON95-III : ${price.ron95}
+</div>
+
+</div>
+
 </body>
 </html>
 `;
 
-  const html2 = `
-<html>
-<body style="background:black;color:yellow;font-size:60px;text-align:center;">
-E5: ${e5}<br>
-RON95: ${ron95}
-</body>
-</html>
-`;
+fs.writeFileSync("giaxang_v1.html",html);
+fs.writeFileSync("giaxang_v2.html",html);
 
-  fs.writeFileSync("giaxang_v1.html", html1);
-  fs.writeFileSync("giaxang_v2.html", html2);
+console.log("Updated:",price);
 
-  await browser.close();
 }
 
 run();
