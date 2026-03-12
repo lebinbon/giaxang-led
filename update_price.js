@@ -1,46 +1,48 @@
+const https = require("https");
 const fs = require("fs");
-const { chromium } = require("playwright");
 
-(async () => {
+https.get(
+"https://www.petrolimex.com.vn/ServicePetrolimex.svc/GetPrice",
+(res)=>{
 
-const browser = await chromium.launch();
-const page = await browser.newPage();
+let data="";
 
-await page.goto("https://petrolimex.com.vn", { waitUntil: "networkidle" });
+res.on("data",chunk=>data+=chunk);
 
-await page.waitForTimeout(3000);
+res.on("end",()=>{
 
-const rows = await page.$$eval("table tr", trs =>
-trs.map(tr => tr.innerText)
-);
+const json=JSON.parse(data);
 
-let price = {
+const price={
 ron95:"00.000",
 e5:"00.000",
 do001:"00.000",
 do005:"00.000"
 };
 
-rows.forEach(r=>{
+json.forEach(p=>{
 
-if(r.includes("RON 95") && price.ron95==="00.000")
-price.ron95 = r.split(" ")[2];
+if(p.ProductName.includes("RON 95"))
+price.ron95=p.Price1;
 
-if(r.includes("E5") && price.e5==="00.000")
-price.e5 = r.split(" ")[2];
+if(p.ProductName.includes("E5"))
+price.e5=p.Price1;
 
-if(r.includes("DO 0,001"))
-price.do001 = r.split(" ")[2];
+if(p.ProductName.includes("DO 0,001"))
+price.do001=p.Price1;
 
-if(r.includes("DO 0,05"))
-price.do005 = r.split(" ")[2];
+if(p.ProductName.includes("DO 0,05"))
+price.do005=p.Price1;
 
 });
 
-fs.writeFileSync("price.json",JSON.stringify(price,null,2));
+fs.writeFileSync(
+"price.json",
+JSON.stringify(price,null,2)
+);
 
 console.log(price);
 
-await browser.close();
+});
 
-})();
+});
