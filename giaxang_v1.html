@@ -5,31 +5,50 @@
         body { 
             margin:0; background: transparent; color:#FFD700; 
             font-family: "Arial Narrow", Arial, sans-serif; 
-            font-size: 20px; /* Hạ xuống 20px để tránh mất chữ */
+            font-size: 20px; /* Hạ nhẹ xuống 20px để đủ chỗ cho chữ Xăng, Dầu */
             font-weight: bold; overflow: hidden; 
             white-space: nowrap; text-shadow: 1px 1px 2px #000;
         }
         .container { 
             width: 100%; height: 100vh; display: flex; 
-            align-items: center; justify-content: flex-start; /* Dồn về bên trái */
+            align-items: center; justify-content: center; 
             padding: 0 5px; box-sizing: border-box; 
         }
-        .label { color: #FFFFFF; margin-right: 5px; } /* Tiêu đề sát hơn */
-        .separator { color: #FFFFFF; opacity: 0.5; margin: 0 3px; } /* Gạch đứng cực sát */
-        .price-value { color: #00FF00; }
-        .item { margin: 0 2px; } /* Giảm khoảng cách giữa các khối mặt hàng */
+        /* Tiêu đề chính */
+        .label { color: #FFFFFF; margin-right: 10px; flex-shrink: 0; } 
+        
+        /* Cụm từng mặt hàng */
+        .item { display: flex; align-items: center; }
+        
+        /* Màu cho chữ XĂNG, DẦU và tên sản phẩm */
+        .product-name { color: #FFD700; }
+        
+        /* Con số giá tiền - Màu xanh lá */
+        .price-value { color: #00FF00; margin-left: 5px; }
+        
+        /* Dấu gạch đứng phân cách */
+        .separator { color: #FFFFFF; opacity: 0.6; margin: 0 8px; }
     </style></head>
     <body>
         <div class="container">
-            <span class="label">GIÁ BÁN:</span>
+            <span class="label">GIÁ BÁN LẺ (Đ/L):</span>
             
-            <span class="item">95-III:<span class="price-value">25.240</span></span>
+            <div class="item">
+                <span class="product-name">XĂNG RON 95-III</span>
+                <span class="price-value">25.240</span>
+            </div>
             <span class="separator">|</span>
             
-            <span class="item">DV:<span class="price-value">26.670</span></span>
+            <div class="item">
+                <span class="product-name">DẦU DO 0,001S-V</span>
+                <span class="price-value">26.670</span>
+            </div>
             <span class="separator">|</span>
             
-            <span class="item">DII:<span class="price-value">26.470</span></span>
+            <div class="item">
+                <span class="product-name">DẦU DO 0,05S-II</span>
+                <span class="price-value">26.470</span>
+            </div>
         </div>
     </body>
     </html>
