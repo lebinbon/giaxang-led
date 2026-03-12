@@ -1,51 +1,40 @@
 const https = require("https");
 const fs = require("fs");
 
-function getHTML() {
-  return new Promise((resolve, reject) => {
+const url = "https://www.petrolimex.com.vn/api/petrolprice";
 
-    https.get("https://petrolimex.com.vn", (res) => {
+https.get(url, (res) => {
 
-      let data = "";
+let data = "";
 
-      res.on("data", chunk => data += chunk);
+res.on("data", chunk => data += chunk);
 
-      res.on("end", () => resolve(data));
+res.on("end", () => {
 
-    }).on("error", reject);
-
-  });
-}
-
-function getPrice(text, name){
-
-const regex = new RegExp(name + "[^0-9]+([0-9]{2}\\.[0-9]{3})");
-
-const match = text.match(regex);
-
-return match ? match[1] : "00.000";
-
-}
-
-async function run(){
-
-const html = await getHTML();
-
-const text = html.replace(/\s+/g," ");
+const json = JSON.parse(data);
 
 const price = {
-
-ron95: getPrice(text,"RON 95-III"),
-e5: getPrice(text,"E5 RON 92"),
-do001: getPrice(text,"DO 0,001"),
-do005: getPrice(text,"DO 0,05")
-
+ron95: json.find(x => x.name.includes("RON 95")).price1,
+e5: json.find(x => x.name.includes("E5")).price1,
+do001: json.find(x => x.name.includes("DO 0,001")).price1,
+do005: json.find(x => x.name.includes("DO 0,05")).price1
 };
 
-fs.writeFileSync("price.json",JSON.stringify(price,null,2));
-
-console.log(price);
-
+function format(v){
+return v.toString().replace(/\B(?=(\d{3})+(?!\d))/g,".");
 }
 
-run();
+const result = {
+ron95: format(price.ron95),
+e5: format(price.e5),
+do001: format(price.do001),
+do005: format(price.do005)
+};
+
+fs.writeFileSync("price.json",JSON.stringify(result,null,2));
+
+console.log(result);
+
+});
+
+});
