@@ -2,7 +2,7 @@ name: Update fuel price
 
 on:
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "*/5 * * * *"
   workflow_dispatch:
 
 jobs:
@@ -19,12 +19,7 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install Playwright
-        run: |
-          npm install playwright
-          npx playwright install chromium
-
-      - name: Run script
+      - name: Run update script
         run: node update_price.js
 
       - name: Commit update
