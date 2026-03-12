@@ -1,138 +1,37 @@
-const { chromium } = require('playwright');
-const fs = require('fs');
+name: Update fuel price
 
-const PRICE_FILE = "last_price.txt";
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
 
-async function layGia(){
+jobs:
+  update:
+    runs-on: ubuntu-latest
 
-    const browser = await chromium.launch();
-    const page = await browser.newPage();
+    steps:
 
-    await page.goto("https://www.petrolimex.com.vn/index.html",{waitUntil:"networkidle"});
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-    await page.hover('text=Giá bán lẻ xăng dầu');
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
 
-    await page.waitForTimeout(3000);
+      - name: Install Playwright
+        run: |
+          npm init -y
+          npm install playwright
+          npx playwright install chromium
 
-    const text = (await page.textContent("body")).toUpperCase();
+      - name: Run script
+        run: node update_price.js
 
-    await browser.close();
-
-    const lines = text.split("\n");
-
-    function findPrice(keyword){
-
-        for(let i=0;i<lines.length;i++){
-
-            if(lines[i].includes(keyword)){
-
-                for(let j=i;j<i+3;j++){
-
-                    if(j<lines.length){
-
-                        const m = lines[j].match(/(\d{2}\.\d{3})/);
-
-                        if(m) return m[1];
-
-                    }
-                }
-            }
-        }
-
-        return "00.000";
-    }
-
-    return {
-
-        ron95: findPrice("RON 95-III"),
-        e5: findPrice("E5 RON 92-II"),
-        do001: findPrice("DO 0,001S-V"),
-        do05: findPrice("DO 0,05S-II")
-
-    };
-
-}
-
-function readOldPrice(){
-
-    if(!fs.existsSync(PRICE_FILE)) return null;
-
-    return fs.readFileSync(PRICE_FILE,"utf8");
-
-}
-
-function savePrice(data){
-
-    const text = `${data.ron95}|${data.e5}|${data.do001}|${data.do05}`;
-
-    fs.writeFileSync(PRICE_FILE,text);
-
-    return text;
-
-}
-
-function taoHTML(data){
-
-const html = `
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<style>
-body{margin:0;background:black;color:#FFD700;font-family:Arial;font-size:28px;font-weight:bold}
-.container{width:1872px;height:82px;display:flex;align-items:center;justify-content:space-around}
-.white{color:white}
-.green{color:#00FF00}
-</style>
-</head>
-
-<body>
-
-<div class="container">
-
-<span class="white">GIÁ XĂNG PETROLIMEX</span>
-
-<span><span class="white">RON95:</span> ${data.ron95}</span>
-
-<span><span class="white">E5:</span> ${data.e5}</span>
-
-<span><span class="white">DO 0.001:</span> <span class="green">${data.do001}</span></span>
-
-<span><span class="white">DO 0.05:</span> <span class="green">${data.do05}</span></span>
-
-</div>
-
-</body>
-</html>
-`;
-
-fs.writeFileSync("giaxang_v1.html",html);
-fs.writeFileSync("giaxang_v2.html",html);
-
-}
-
-async function main(){
-
-    const data = await layGia();
-
-    const newPrice = `${data.ron95}|${data.e5}|${data.do001}|${data.do05}`;
-
-    const oldPrice = readOldPrice();
-
-    if(newPrice === oldPrice){
-
-        console.log("Giá không đổi");
-
-        return;
-
-    }
-
-    console.log("GIÁ THAY ĐỔI:",newPrice);
-
-    savePrice(data);
-
-    taoHTML(data);
-
-}
-
-main();
+      - name: Commit update
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add .
+          git commit -m "update fuel price" || echo "no change"
+          git push
