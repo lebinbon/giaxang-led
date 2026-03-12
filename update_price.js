@@ -1,71 +1,57 @@
 const { chromium } = require("playwright");
 const fs = require("fs");
 
-async function run(){
+async function run() {
 
-const browser = await chromium.launch();
-const page = await browser.newPage();
+  const browser = await chromium.launch({
+    headless: true
+  });
 
-await page.goto("https://www.petrolimex.com.vn/index.html",{waitUntil:"networkidle"});
+  const page = await browser.newPage();
 
-await page.getByText("Giá bán lẻ xăng dầu").first().hover();
+  await page.goto("https://www.petrolimex.com.vn", {
+    timeout: 120000,
+    waitUntil: "domcontentloaded"
+  });
 
-await page.waitForTimeout(3000);
+  await page.waitForTimeout(5000);
 
-const text = (await page.textContent("body")).toUpperCase();
+  const text = await page.textContent("body");
 
-const lines = text.split("\n");
+  function findPrice(keyword) {
+    const regex = new RegExp(keyword + ".*?(\\d{2}\\.\\d{3})");
+    const match = text.match(regex);
+    return match ? match[1] : "00.000";
+  }
 
-function findPrice(key){
+  const ron95 = findPrice("RON95");
+  const e5 = findPrice("E5");
 
-for(let i=0;i<lines.length;i++){
+  console.log("RON95:", ron95);
+  console.log("E5:", e5);
 
-if(lines[i].includes(key)){
-
-for(let j=i;j<i+3;j++){
-
-const m = lines[j].match(/(\d{2}\.\d{3})/);
-
-if(m) return m[1];
-
-}
-
-}
-
-}
-
-return "00.000";
-
-}
-
-const data = {
-ron95: findPrice("RON 95"),
-e5: findPrice("E5"),
-do001: findPrice("DO 0,001")
-};
-
-const html = `
-<!DOCTYPE html>
+  const html1 = `
 <html>
-<meta charset="utf-8">
-<body style="background:black;color:#FFD700;font-size:32px;font-family:Arial">
-
-GIÁ XĂNG PETROLIMEX VÙNG 1
-
-RON95: ${data.ron95}
-
-E5: ${data.e5}
-
-DO 0.001: ${data.do001}
-
+<body style="background:black;color:red;font-size:60px;text-align:center;">
+E5: ${e5}<br>
+RON95: ${ron95}
 </body>
 </html>
 `;
 
-fs.writeFileSync("giaxang_v1.html",html);
+  const html2 = `
+<html>
+<body style="background:black;color:yellow;font-size:60px;text-align:center;">
+E5: ${e5}<br>
+RON95: ${ron95}
+</body>
+</html>
+`;
 
-await browser.close();
+  fs.writeFileSync("giaxang_v1.html", html1);
+  fs.writeFileSync("giaxang_v2.html", html2);
 
+  await browser.close();
 }
 
 run();
