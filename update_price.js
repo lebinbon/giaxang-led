@@ -4,7 +4,7 @@ const fs = require("fs");
 function getHTML() {
   return new Promise((resolve, reject) => {
 
-    https.get("https://www.petrolimex.com.vn/", (res) => {
+    https.get("https://petrolimex.com.vn", (res) => {
 
       let data = "";
 
@@ -17,33 +17,34 @@ function getHTML() {
   });
 }
 
-function findPrice(text, keyword) {
+function getPrice(text, name){
 
-  const r = new RegExp(keyword + ".*?(\\d{2}\\.\\d{3})");
-  const m = text.match(r);
+const regex = new RegExp(name + "[^0-9]+([0-9]{2}\\.[0-9]{3})");
 
-  return m ? m[1] : "00.000";
+const match = text.match(regex);
+
+return match ? match[1] : "00.000";
 
 }
 
-async function run() {
+async function run(){
 
-  const html = await getHTML();
+const html = await getHTML();
 
-  const text = html.replace(/\s+/g," ");
+const text = html.replace(/\s+/g," ");
 
-  const price = {
+const price = {
 
-    ron95: findPrice(text,"RON 95"),
-    e5: findPrice(text,"E5"),
-    do001: findPrice(text,"0,001"),
-    do005: findPrice(text,"0,05")
+ron95: getPrice(text,"RON 95-III"),
+e5: getPrice(text,"E5 RON 92"),
+do001: getPrice(text,"DO 0,001"),
+do005: getPrice(text,"DO 0,05")
 
-  };
+};
 
-  fs.writeFileSync("price.json", JSON.stringify(price,null,2));
+fs.writeFileSync("price.json",JSON.stringify(price,null,2));
 
-  console.log(price);
+console.log(price);
 
 }
 
