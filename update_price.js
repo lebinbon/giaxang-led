@@ -1,74 +1,86 @@
-const fs = require("fs");
+const { chromium } = require('playwright');
+const fs = require('fs');
 
-async function updatePrice() {
+async function layGia() {
 
-    const res = await fetch("https://www.petrolimex.com.vn/");
-    const html = await res.text();
+    const browser = await chromium.launch();
+    const page = await browser.newPage();
 
-    function getPrice(name) {
+    await page.goto("https://www.petrolimex.com.vn/index.html",{waitUntil:"networkidle"});
 
-        const regex = new RegExp(name + "[^0-9]{0,50}([0-9]{2}\\.[0-9]{3})","i");
-        const match = html.match(regex);
+    await page.hover('text=Giá bán lẻ xăng dầu');
 
-        if(match){
-            return match[1];
+    await page.waitForTimeout(3000);
+
+    const text = (await page.textContent('body')).toUpperCase();
+
+    await browser.close();
+
+    const lines = text.split("\n");
+
+    function findPrice(keyword){
+
+        for(let i=0;i<lines.length;i++){
+
+            if(lines[i].includes(keyword)){
+
+                for(let j=i;j<i+3;j++){
+
+                    if(j<lines.length){
+
+                        const m = lines[j].match(/(\d{2}\.\d{3})/);
+
+                        if(m) return m[1];
+
+                    }
+                }
+            }
         }
 
         return "00.000";
     }
 
-    const ron95 = getPrice("RON 95");
-    const e5 = getPrice("E5 RON 92");
-    const do001 = getPrice("0,001");
-    const do05 = getPrice("0,05");
+    return {
 
-    console.log("RON95:",ron95);
-    console.log("E5:",e5);
-    console.log("DO001:",do001);
-    console.log("DO05:",do05);
+        ron95: findPrice("RON 95-III"),
+        e5: findPrice("E5 RON 92-II"),
+        do001: findPrice("DO 0,001S-V"),
+        do05: findPrice("DO 0,05S-II")
 
-    const html_output = `
+    };
+}
+
+async function main(){
+
+    const data = await layGia();
+
+    console.log(data);
+
+    const html = `
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
 <style>
-body{
-margin:0;
-background:black;
-color:#FFD700;
-font-family:Arial;
-font-size:28px;
-font-weight:bold;
-}
-
-.container{
-width:1872px;
-height:82px;
-display:flex;
-align-items:center;
-justify-content:space-around;
-}
-
+body{margin:0;background:black;color:#FFD700;font-family:Arial;font-size:28px;font-weight:bold}
+.container{width:1872px;height:82px;display:flex;align-items:center;justify-content:space-around}
 .white{color:white}
 .green{color:#00FF00}
-
 </style>
 </head>
-
 <body>
 
 <div class="container">
 
 <span class="white">GIÁ XĂNG PETROLIMEX</span>
 
-<span><span class="white">RON95:</span> ${ron95}</span>
+<span><span class="white">RON95:</span> ${data.ron95}</span>
 
-<span><span class="white">E5:</span> ${e5}</span>
+<span><span class="white">E5:</span> ${data.e5}</span>
 
-<span><span class="white">DO 0.001:</span> <span class="green">${do001}</span></span>
+<span><span class="white">DO 0.001:</span> <span class="green">${data.do001}</span></span>
 
-<span><span class="white">DO 0.05:</span> <span class="green">${do05}</span></span>
+<span><span class="white">DO 0.05:</span> <span class="green">${data.do05}</span></span>
 
 </div>
 
@@ -76,9 +88,8 @@ justify-content:space-around;
 </html>
 `;
 
-    fs.writeFileSync("giaxang_v1.html", html_output);
-    fs.writeFileSync("giaxang_v2.html", html_output);
-
+    fs.writeFileSync("giaxang_v1.html", html);
+    fs.writeFileSync("giaxang_v2.html", html);
 }
 
-updatePrice();
+main();
