@@ -84,19 +84,19 @@ const fs = require('fs');
             <span class="label">GIÁ BÁN LẺ (Đ/L):</span>
             
             <div class="item">
-                <span class="product-name">XĂNG RON 95-III</span>
+                <span class="product-name">XĂNG RON 95-III:</span>
                 <span class="price-value">${dataV.p95}</span>
             </div>
             <span class="separator">|</span>
             
             <div class="item">
-                <span class="product-name">DẦU DO 0,001S-V</span>
+                <span class="product-name">DẦU DO 0,001S-V:</span>
                 <span class="price-value">${dataV.do001}</span>
             </div>
             <span class="separator">|</span>
             
             <div class="item">
-                <span class="product-name">DẦU DO 0,05S-II</span>
+                <span class="product-name">DẦU DO 0,05S-II:</span>
                 <span class="price-value">${dataV.do05}</span>
             </div>
         </div>
