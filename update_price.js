@@ -1,95 +1,73 @@
 const { chromium } = require('playwright');
 const fs = require('fs');
 
-async function layGia() {
+async function layGia(){
 
-    const browser = await chromium.launch();
-    const page = await browser.newPage();
+const browser = await chromium.launch();
+const page = await browser.newPage();
 
-    await page.goto("https://www.petrolimex.com.vn/index.html",{waitUntil:"networkidle"});
+await page.goto("https://www.petrolimex.com.vn/index.html",{waitUntil:"networkidle"});
 
-    await page.hover('text=Giá bán lẻ xăng dầu');
+await page.getByText("Giá bán lẻ xăng dầu").first().hover();
 
-    await page.waitForTimeout(3000);
+await page.waitForTimeout(3000);
 
-    const text = (await page.textContent('body')).toUpperCase();
+const text = (await page.textContent("body")).toUpperCase();
 
-    await browser.close();
+const lines = text.split("\n");
 
-    const lines = text.split("\n");
+function findPrice(key){
 
-    function findPrice(keyword){
+for(let i=0;i<lines.length;i++){
 
-        for(let i=0;i<lines.length;i++){
+if(lines[i].includes(key)){
 
-            if(lines[i].includes(keyword)){
+for(let j=i;j<i+3;j++){
 
-                for(let j=i;j<i+3;j++){
+const m = lines[j].match(/(\d{2}\.\d{3})/);
 
-                    if(j<lines.length){
+if(m) return m[1];
 
-                        const m = lines[j].match(/(\d{2}\.\d{3})/);
-
-                        if(m) return m[1];
-
-                    }
-                }
-            }
-        }
-
-        return "00.000";
-    }
-
-    return {
-
-        ron95: findPrice("RON 95-III"),
-        e5: findPrice("E5 RON 92-II"),
-        do001: findPrice("DO 0,001S-V"),
-        do05: findPrice("DO 0,05S-II")
-
-    };
 }
 
-async function main(){
+}
 
-    const data = await layGia();
+}
 
-    console.log(data);
+return "00.000";
 
-    const html = `
+}
+
+const data = {
+
+ron95: findPrice("RON 95"),
+e5: findPrice("E5"),
+do001: findPrice("DO 0,001")
+
+};
+
+const html = `
 <!DOCTYPE html>
 <html>
-<head>
 <meta charset="utf-8">
-<style>
-body{margin:0;background:black;color:#FFD700;font-family:Arial;font-size:28px;font-weight:bold}
-.container{width:1872px;height:82px;display:flex;align-items:center;justify-content:space-around}
-.white{color:white}
-.green{color:#00FF00}
-</style>
-</head>
-<body>
+<body style="background:black;color:yellow;font-size:30px;font-family:Arial">
 
-<div class="container">
+GIÁ XĂNG PETROLIMEX VÙNG 1
 
-<span class="white">GIÁ XĂNG PETROLIMEX</span>
+RON95: ${data.ron95}
 
-<span><span class="white">RON95:</span> ${data.ron95}</span>
+E5: ${data.e5}
 
-<span><span class="white">E5:</span> ${data.e5}</span>
-
-<span><span class="white">DO 0.001:</span> <span class="green">${data.do001}</span></span>
-
-<span><span class="white">DO 0.05:</span> <span class="green">${data.do05}</span></span>
-
-</div>
+DO 0.001: ${data.do001}
 
 </body>
 </html>
 `;
 
-    fs.writeFileSync("giaxang_v1.html", html);
-    fs.writeFileSync("giaxang_v2.html", html);
+fs.writeFileSync("giaxang_v1.html",html);
+
+await browser.close();
+
 }
 
-main();
+layGia();
