@@ -2,19 +2,19 @@ name: Update Fuel Price
 
 on:
   schedule:
-    - cron: '*/30 * * * *' # Chạy 30 phút một lần (GitHub Actions không nên chạy quá dày)
+    - cron: '*/30 * * * *'
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4 # Nâng lên v4
       
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4 # Nâng lên v4
         with:
-          node-version: '18'
+          node-version: '24' # Dùng bản mới nhất theo khuyến nghị của GitHub
           
       - name: Install dependencies
         run: |
@@ -26,8 +26,8 @@ jobs:
         
       - name: Commit and Push
         run: |
-          git config --global user.name "GitHub Action"
-          git config --global user.email "action@github.com"
+          git config --global user.name "lebinbon"
+          git config --global user.email "lebinbon@users.noreply.github.com"
           git add giaxang_v1.html giaxang_v2.html price.json
           git commit -m "Cập nhật giá xăng: $(date)" || exit 0
           git push
