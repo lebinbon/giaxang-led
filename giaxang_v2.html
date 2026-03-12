@@ -4,29 +4,48 @@
     <head><meta charset='utf-8'><style>
         body { 
             margin:0; 
-            background: transparent; /* Đổi từ black sang transparent */
-            color:#FFD700; 
-            font-family:Arial; 
-            font-size:28px; 
-            font-weight:bold; 
-            overflow:hidden; 
+            background: transparent; 
+            color:#FFD700; /* Màu vàng đặc trưng Petrolimex */
+            font-family: "Arial Black", Gadget, sans-serif; /* Dùng font dày để đổ bóng đẹp hơn */
+            font-size: 30px; 
+            font-weight: bold; 
+            overflow: hidden; 
+            white-space: nowrap;
+            /* Đổ bóng 4 hướng giúp chữ cực kỳ sắc nét trên mọi loại nền video/ảnh */
+            text-shadow: 
+                2px 2px 0px #000, 
+                -2px -2px 0px #000, 
+                2px -2px 0px #000, 
+                -2px 2px 0px #000,
+                4px 4px 8px rgba(0,0,0,1); 
         }
         .container { 
-            width:1872px; 
-            height:82px; 
-            display:flex; 
-            align-items:center; 
-            justify-content: space-around; 
-            padding: 0 10px; 
+            width: 1872px; 
+            height: 82px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 0 20px; 
             box-sizing: border-box; 
         }
-        .highlight { color: white; } 
-        .oil { color: #00FF00; }
+        .label { color: #FFFFFF; margin-right: 20px; } /* Chữ "GIÁ BÁN LẺ" màu trắng */
+        .separator { color: #FFFFFF; margin: 0 30px; font-weight: normal; } /* Dấu gạch đứng màu trắng */
+        .price-value { color: #00FF00; } /* Số tiền màu xanh lá cho nổi bật */
     </style></head>
-    <body><div class="container">
-        <span><span class="highlight">GIÁ PETROLIMEX:</span></span>
-        <span><span class="highlight">95-III:</span> 25.240</span>
-        <span><span class="highlight">E5-92:</span> 22.950</span>
-        <span><span class="highlight">DO 0,001:</span> <span class="oil">26.670</span></span>
-        <span><span class="highlight">DO 0,05:</span> <span class="oil">26.470</span></span>
-    </div></body></html>
+    <body>
+        <div class="container">
+            <span class="label">GIÁ BÁN LẺ (Đ/L):</span>
+            
+            <span>XĂNG RON 95 MỨC 3: <span class="price-value">25.240</span></span>
+            <span class="separator">|</span>
+            
+            <span>XĂNG E5 RON 92 MỨC 2: <span class="price-value">22.950</span></span>
+            <span class="separator">|</span>
+            
+            <span>DẦU DO 0,001 MỨC 5: <span class="price-value">26.670</span></span>
+            <span class="separator">|</span>
+            
+            <span>DẦU DO 0,05S MỨC 2: <span class="price-value">26.470</span></span>
+        </div>
+    </body>
+    </html>
