@@ -3,20 +3,12 @@ const fs = require('fs');
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext({
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
-  });
-  const page = await context.newPage();
+  const page = await browser.newPage();
 
   try {
-    console.log("🚀 Đang quét giá Petrolimex (Chỉ lấy 3 mặt hàng)...");
-    await page.goto('https://www.petrolimex.com.vn/index.html', { 
-      waitUntil: 'domcontentloaded', 
-      timeout: 60000 
-    });
-
+    console.log("🚀 Đang quét giá Petrolimex (Bản tự động co giãn)...");
+    await page.goto('https://www.petrolimex.com.vn/index.html', { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(5000);
-
     const menu = page.getByText('Giá bán lẻ xăng dầu').first();
     await menu.hover();
     await page.waitForTimeout(5000); 
@@ -29,13 +21,11 @@ const fs = require('fs');
         if (lines[i].includes(keyword)) {
           let foundV1 = "00.000", foundV2 = "00.000";
           for (let j = i; j < i + 5; j++) {
-            if (j >= lines.length) break;
             const matches = lines[j].match(/(\d{2}\.\d{3})/g); 
-            if (matches && matches.length >= 2) {
-              return { v1: matches[0], v2: matches[1] };
-            } else if (matches && matches.length === 1) {
-              if (foundV1 === "00.000") foundV1 = matches[0];
-              else return { v1: foundV1, v2: matches[0] };
+            if (matches && matches.length >= 2) return { v1: matches[0], v2: matches[1] };
+            if (matches && matches.length === 1) {
+                if (foundV1 === "00.000") foundV1 = matches[0];
+                else return { v1: foundV1, v2: matches[0] };
             }
           }
           return { v1: foundV1, v2: foundV2 };
@@ -44,62 +34,70 @@ const fs = require('fs');
       return { v1: "00.000", v2: "00.000" };
     }
 
-    // CHỈ LẤY 3 MẶT HÀNG NÀY
     const p95 = findPrices("RON 95-III");
     const do001 = findPrices("DO 0,001S-V");
     const do05 = findPrices("DO 0,05S-II");
 
+    const v1 = { p95: p95.v1, do001: do001.v1, do05: do05.v1 };
+
+    // HÀM TẠO HTML TỰ CO GIÃN THEO KHUNG HÌNH (VIEWPORT)
     const createHTML = (dataV) => `
     <!DOCTYPE html>
     <html>
-    <head><meta charset='utf-8'><style>
-        body { 
-            margin:0; background: transparent; color:#FFD700; 
-            font-family: "Arial Narrow", Arial, sans-serif; 
-            font-size: 28px; font-weight: bold; overflow: hidden; 
-            white-space: nowrap; text-shadow: 2px 2px 3px #000;
-        }
-        .container { 
-            width: 1872px; height: 82px; display: flex; 
-            align-items: center; justify-content: space-around; 
-            padding: 0 40px; box-sizing: border-box; 
-        }
-        .label { color: #FFFFFF; }
-        .separator { color: #FFFFFF; opacity: 0.7; }
-        .price-value { color: #00FF00; }
-    </style></head>
+    <head>
+        <meta charset='utf-8'>
+        <style>
+            html, body { 
+                margin: 0; padding: 0; width: 100%; height: 100%; 
+                background: transparent; overflow: hidden; 
+            }
+            .container { 
+                width: 100vw; 
+                height: 100vh; 
+                display: flex; 
+                align-items: center; 
+                justify-content: space-around; 
+                box-sizing: border-box;
+                padding: 0 2%;
+            }
+            .item {
+                display: flex;
+                align-items: center;
+                /* Font size tính theo chiều cao của ô (vh) để không bao giờ mất dòng */
+                font-size: 65vh; 
+                font-family: "Arial Narrow", Arial, sans-serif;
+                font-weight: bold;
+                white-space: nowrap;
+                text-shadow: 1px 1px 2px #000;
+            }
+            .product { color: #FFD700; }
+            .price { color: #00FF00; margin-left: 2px; }
+            .sep { color: #FFFFFF; font-size: 50vh; opacity: 0.8; margin: 0 1vw; }
+        </style>
+    </head>
     <body>
         <div class="container">
-            <span class="label">GIÁ BÁN LẺ (Đ/L):</span>
-            
-            <span>XĂNG RON 95-III: <span class="price-value">${dataV.p95}</span></span>
-            <span class="separator">|</span>
-            
-            <span>DẦU DO 0,001S-V: <span class="price-value">${dataV.do001}</span></span>
-            <span class="separator">|</span>
-            
-            <span>DẦU DO 0,05S-II: <span class="price-value">${dataV.do05}</span></span>
+            <div class="item">
+                <span class="product">95-III:</span>
+                <span class="price">${dataV.p95}</span>
+            </div>
+            <span class="sep">|</span>
+            <div class="item">
+                <span class="product">DO-V:</span>
+                <span class="price">${dataV.do001}</span>
+            </div>
+            <span class="sep">|</span>
+            <div class="item">
+                <span class="product">DO-II:</span>
+                <span class="price">${dataV.do05}</span>
+            </div>
         </div>
     </body>
     </html>`;
 
-    // Ghi file cho Vùng 1
-    fs.writeFileSync('giaxang_v1.html', createHTML({ p95: p95.v1, do001: do001.v1, do05: do05.v1 }));
-    
-    // Ghi file cho Vùng 2
-    fs.writeFileSync('giaxang_v2.html', createHTML({ p95: p95.v2, do001: do001.v2, do05: do05.v2 }));
+    // Ghi ra file duy nhất, Giang dùng link này cho mọi ô Web Widget
+    fs.writeFileSync('giaxang_auto.html', createHTML(v1));
 
-    // Cập nhật file JSON
-    fs.writeFileSync('price.json', JSON.stringify({ 
-        v1: { p95: p95.v1, do001: do001.v1, do05: do05.v1 },
-        v2: { p95: p95.v2, do001: do001.v2, do05: do05.v2 },
-        last_update: new Date().toLocaleString() 
-    }, null, 2));
-
-    console.log("✅ Đã cập nhật xong! Chỉ còn 3 mặt hàng.");
-  } catch (error) {
-    console.error("❌ Lỗi:", error.message);
-  } finally {
-    await browser.close();
-  }
+    console.log("✅ Đã tạo xong bản HTML tự động co giãn theo kích thước ô!");
+  } catch (error) { console.error(error); } finally { await browser.close(); }
 })();
