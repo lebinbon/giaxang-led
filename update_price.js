@@ -1,107 +1,49 @@
 const https = require("https");
 const fs = require("fs");
 
-const PRICE_FILE = "last_price.json";
+const PRICE_FILE = "price.json";
 
-function fetchPrice() {
+function getHTML() {
+  return new Promise((resolve, reject) => {
 
-return new Promise((resolve,reject)=>{
+    https.get("https://www.petrolimex.com.vn", res => {
 
-https.get("https://www.petrolimex.com.vn",res=>{
+      let data = "";
 
-let data="";
+      res.on("data", chunk => data += chunk);
 
-res.on("data",chunk=>data+=chunk);
+      res.on("end", () => resolve(data));
 
-res.on("end",()=>{
+    }).on("error", reject);
 
-function find(keyword){
-
-const regex=new RegExp(keyword+".*?(\\d{2}\\.\\d{3})");
-const match=data.match(regex);
-return match?match[1]:"00.000";
-
+  });
 }
 
-const e5=find("E5");
-const ron95=find("RON 95");
+function findPrice(html, keyword) {
 
-resolve({e5,ron95});
+  const regex = new RegExp(keyword + "[^0-9]*(\\d{2}\\.\\d{3})");
 
-});
+  const match = html.match(regex);
 
-}).on("error",reject);
-
-});
-
+  return match ? match[1] : "00.000";
 }
 
-async function run(){
+async function run() {
 
-const price=await fetchPrice();
+  const html = await getHTML();
 
-let last={};
+  const price = {
 
-if(fs.existsSync(PRICE_FILE)){
-last=JSON.parse(fs.readFileSync(PRICE_FILE));
-}
+    ron95: findPrice(html, "RON 95"),
+    e5: findPrice(html, "E5"),
+    do001: findPrice(html, "0,001"),
+    do005: findPrice(html, "0,05")
 
-if(price.e5===last.e5 && price.ron95===last.ron95){
-console.log("No price change");
-return;
-}
+  };
 
-fs.writeFileSync(PRICE_FILE,JSON.stringify(price));
+  fs.writeFileSync(PRICE_FILE, JSON.stringify(price, null, 2));
 
-const html=`
-<html>
-<head>
-<meta charset="UTF-8">
-<style>
-
-body{
-background:black;
-color:red;
-font-family:Arial;
-text-align:center;
-}
-
-.box{
-margin-top:120px;
-}
-
-.line{
-font-size:120px;
-font-weight:bold;
-margin:40px;
-}
-
-</style>
-</head>
-
-<body>
-
-<div class="box">
-
-<div class="line">
-E5 RON92 : ${price.e5}
-</div>
-
-<div class="line">
-RON95-III : ${price.ron95}
-</div>
-
-</div>
-
-</body>
-</html>
-`;
-
-fs.writeFileSync("giaxang_v1.html",html);
-fs.writeFileSync("giaxang_v2.html",html);
-
-console.log("Updated:",price);
-
+  console.log("Updated:", price);
 }
 
 run();
