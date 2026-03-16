@@ -12,35 +12,32 @@ const fs = require('fs');
       timeout: 60000 
     });
 
-    // Chờ thêm một chút cho bảng giá hiện ra hoàn toàn
-    await page.waitForTimeout(3000);
+    // Chờ 5 giây để bảng giá tải xong hoàn toàn
+    await page.waitForTimeout(5000);
 
-    // Lấy tất cả các ô trong bảng giá
-    const cells = await page.$$eval('td', tds => tds.map(td => td.innerText.trim().toUpperCase()));
+    // Lấy toàn bộ text thô trên trang để quét cho chắc chắn
+    const fullText = await page.evaluate(() => document.body.innerText.toUpperCase());
+    const lines = fullText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
 
-    function findPrice(keyword) {
-      for (let i = 0; i < cells.length; i++) {
-        if (cells[i].includes(keyword)) {
-          // Giá thường nằm ở ô ngay sau hoặc ô kế tiếp có chứa số
-          for (let j = i + 1; j < i + 5; j++) {
-            if (cells[j] && /^\d{2}\.\d{3}$/.test(cells[j])) {
-              return cells[j];
-            }
+    function getPrice(keyword) {
+      for (let i = 0; i < lines.length; i++) {
+        if (lines[i].includes(keyword)) {
+          // Sau khi thấy tên sản phẩm, quét 3 dòng tiếp theo để tìm con số giá tiền
+          for (let j = i; j < i + 4; j++) {
+            const matches = lines[j].match(/(\d{2}\.\d{3})/);
+            if (matches) return matches[1];
           }
         }
       }
       return "00.000";
     }
 
-    const p95 = findPrice("RON 95-III");
-    const do001 = findPrice("DO 0,001S-V");
-    const do05 = findPrice("DO 0,05S-II");
+    // Lấy giá theo đúng tên trong ảnh bạn gửi
+    const p95 = getPrice("RON 95-III");
+    const do001 = getPrice("DO 0,001S-V");
+    const do05 = getPrice("DO 0,05S-II");
 
-    console.log(`📊 Kết quả quét: 95: ${p95}, DO-V: ${do001}, DO-II: ${do05}`);
-
-    if (p95 === "00.000") {
-        console.log("⚠️ Cảnh báo: Có thể cấu trúc web thay đổi, đang dùng giá mặc định.");
-    }
+    console.log(`📊 Kết quả: 95: ${p95}, DO-V: ${do001}, DO-II: ${do05}`);
 
     const createHTML = (data) => `
     <!DOCTYPE html>
@@ -86,12 +83,12 @@ const fs = require('fs');
 
     const priceData = { p95, do001, do05 };
     fs.writeFileSync('giaxang_v1.html', createHTML(priceData));
-    fs.writeFileSync('price.json', JSON.stringify({ ...priceData, last_update: new Date().toLocaleString() }, null, 2));
+    fs.writeFileSync('price.json', JSON.stringify({ ...priceData, update: new Date().toLocaleString() }, null, 2));
 
-    console.log("✅ Đã cập nhật xong!");
+    console.log("✅ Cập nhật hoàn tất!");
 
   } catch (error) {
-    console.error("❌ Lỗi thực thi:", error.message);
+    console.error("❌ Lỗi:", error.message);
   } finally {
     await browser.close();
   }
