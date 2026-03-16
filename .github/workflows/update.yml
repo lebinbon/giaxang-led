@@ -24,14 +24,18 @@ jobs:
       - name: Run Scraper
         run: node update_price.js
         
-      - name: Commit and Push
+            - name: Commit and Push
         run: |
           git config --global user.name "lebinbon"
           git config --global user.email "lebinbon@users.noreply.github.com"
+          
+          # Buộc cập nhật dữ liệu mới nhất từ remote
+          git fetch origin main
+          
           git add giaxang_v1.html giaxang_v2.html price.json
           
-          # Lệnh quan trọng: Tự động lấy dữ liệu mới về trước khi Push
-          git pull --rebase origin main
+          # Commit nếu có thay đổi, nếu không thì bỏ qua
+          git commit -m "Cập nhật giá xăng: $(date)" || echo "Không có thay đổi để commit"
           
-          git commit -m "Cập nhật giá xăng: $(date)" || exit 0
-          git push origin main
+          # ÉP BUỘC đẩy dữ liệu lên để tránh lỗi fetch first
+          git push origin main --force
