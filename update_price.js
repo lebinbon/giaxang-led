@@ -3,48 +3,45 @@ const fs = require('fs');
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext({
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
-  });
+  const context = await browser.newContext();
   const page = await context.newPage();
 
   try {
-    console.log("🚀 Đang lấy giá từ Webgia.com...");
-    
-    // Truy cập trực tiếp trang giá xăng dầu Petrolimex trên Webgia
+    console.log("🚀 Đang mở Webgia.com...");
     await page.goto('https://webgia.com/gia-xang-dau/petrolimex/', { 
-      waitUntil: 'domcontentloaded', 
+      waitUntil: 'networkidle', 
       timeout: 60000 
     });
 
-    // Đợi 3 giây để dữ liệu bảng hiện ra
     await page.waitForTimeout(3000);
 
-    const priceData = await page.evaluate(() => {
-      const results = {};
-      // Tìm tất cả các hàng trong bảng giá
-      const rows = Array.from(document.querySelectorAll('tr'));
+    const prices = await page.evaluate(() => {
+      const results = { p95: "00.000", do001: "00.000", do05: "00.000" };
       
-      rows.forEach(row => {
-        const text = row.innerText.toUpperCase();
-        // Tìm các số có định dạng XX.XXX (ví dụ 25.570)
-        const matches = text.match(/(\d{2}\.\d{3})/g);
-        
-        if (matches && matches.length >= 1) {
-          // Webgia để giá Vùng 1 ở cột đầu tiên sau tên sản phẩm
-          if (text.includes('RON 95-III')) results.p95 = matches[0];
-          if (text.includes('0,001S-V')) results.do001 = matches[0];
-          if (text.includes('0,05S-II')) results.do05 = matches[0];
-        }
-      });
+      // Tìm tất cả các bảng trên trang
+      const tables = Array.from(document.querySelectorAll('table'));
+      
+      // Chỉ tìm bảng nào có chứa chữ "Sản phẩm" và "Vùng 1"
+      const priceTable = tables.find(t => t.innerText.includes('Sản phẩm') && t.innerText.includes('Vùng 1'));
+
+      if (priceTable) {
+        const rows = Array.from(priceTable.querySelectorAll('tr'));
+        rows.forEach(row => {
+          const cells = Array.from(row.querySelectorAll('td'));
+          if (cells.length >= 2) {
+            const name = cells[0].innerText.toUpperCase();
+            const valV1 = cells[1].innerText.trim();
+
+            if (name.includes('RON 95-III')) results.p95 = valV1;
+            if (name.includes('DO 0,001S-V')) results.do001 = valV1;
+            if (name.includes('DO 0,05S-II') || name.includes('DO 0.05S')) results.do05 = valV1;
+          }
+        });
+      }
       return results;
     });
 
-    console.log("📊 Kết quả quét được:", priceData);
-
-    const p95 = priceData.p95 || "00.000";
-    const do001 = priceData.do001 || "00.000";
-    const do05 = priceData.do05 || "00.000";
+    console.log("📊 Giá lấy được từ bảng:", prices);
 
     const createHTML = (d) => `
     <!DOCTYPE html><html><head><meta charset='utf-8'><style>
@@ -56,20 +53,20 @@ const fs = require('fs');
         .separator { color:#FFFFFF; opacity:0.6; margin:0 8px; }
     </style></head><body><div class="container">
         <span class="label">GIÁ BÁN LẺ (Đ/L):</span>
-        <div class="item"><span>XĂNG RON 95-III</span><span class="price-value">${p95}</span></div>
+        <div class="item"><span>XĂNG RON 95-III</span><span class="price-value">${prices.p95}</span></div>
         <span class="separator">|</span>
-        <div class="item"><span>DẦU DO 0,001S-V</span><span class="price-value">${do001}</span></div>
+        <div class="item"><span>DẦU DO 0,001S-V</span><span class="price-value">${prices.do001}</span></div>
         <span class="separator">|</span>
-        <div class="item"><span>DẦU DO 0,05S-II</span><span class="price-value">${do05}</span></div>
+        <div class="item"><span>DẦU DO 0,05S-II</span><span class="price-value">${prices.do05}</span></div>
     </div></body></html>`;
 
     fs.writeFileSync('giaxang_v1.html', createHTML({}));
-    fs.writeFileSync('price.json', JSON.stringify({ p95, do001, do05, update: new Date().toLocaleString() }, null, 2));
+    fs.writeFileSync('price.json', JSON.stringify({ ...prices, update: new Date().toLocaleString() }, null, 2));
 
-    console.log("✅ Cập nhật hoàn tất!");
+    console.log("✅ Xong! Kiểm tra file price.json để thấy kết quả.");
 
   } catch (error) {
-    console.error("❌ Lỗi quét Webgia:", error.message);
+    console.error("❌ Lỗi:", error.message);
   } finally {
     await browser.close();
   }
