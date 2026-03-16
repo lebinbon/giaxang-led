@@ -7,42 +7,40 @@ const fs = require('fs');
   const page = await context.newPage();
 
   try {
-    console.log("🚀 Đang mở Webgia.com...");
+    console.log("🚀 Đang truy cập link cụ thể của Webgia...");
     await page.goto('https://webgia.com/gia-xang-dau/petrolimex/', { 
       waitUntil: 'networkidle', 
       timeout: 60000 
     });
 
-    await page.waitForTimeout(3000);
+    // Đợi 5 giây để chắc chắn bảng giá đã render xong hoàn toàn
+    await page.waitForTimeout(5000);
 
     const prices = await page.evaluate(() => {
       const results = { p95: "00.000", do001: "00.000", do05: "00.000" };
       
-      // Tìm tất cả các bảng trên trang
-      const tables = Array.from(document.querySelectorAll('table'));
-      
-      // Chỉ tìm bảng nào có chứa chữ "Sản phẩm" và "Vùng 1"
-      const priceTable = tables.find(t => t.innerText.includes('Sản phẩm') && t.innerText.includes('Vùng 1'));
+      // Lấy tất cả các hàng <tr> trong tất cả các bảng
+      const allRows = Array.from(document.querySelectorAll('tr'));
 
-      if (priceTable) {
-        const rows = Array.from(priceTable.querySelectorAll('tr'));
-        rows.forEach(row => {
-          const cells = Array.from(row.querySelectorAll('td'));
-          if (cells.length >= 2) {
-            const name = cells[0].innerText.toUpperCase();
-            const valV1 = cells[1].innerText.trim();
+      allRows.forEach(row => {
+        const cells = Array.from(row.querySelectorAll('td'));
+        // Bảng giá xăng dầu của Webgia thường có ít nhất 3 cột (Tên, Vùng 1, Vùng 2)
+        if (cells.length >= 2) {
+          const name = cells[0].innerText.toUpperCase();
+          const v1 = cells[1].innerText.trim();
 
-            if (name.includes('RON 95-III')) results.p95 = valV1;
-            if (name.includes('DO 0,001S-V')) results.do001 = valV1;
-            if (name.includes('DO 0,05S-II') || name.includes('DO 0.05S')) results.do05 = valV1;
-          }
-        });
-      }
+          // Kiểm tra tên sản phẩm (dùng .includes để tránh lỗi ký tự trắng)
+          if (name.includes('RON 95-III')) results.p95 = v1;
+          if (name.includes('0,001S-V')) results.do001 = v1;
+          if (name.includes('0,05S-II')) results.do05 = v1;
+        }
+      });
       return results;
     });
 
-    console.log("📊 Giá lấy được từ bảng:", prices);
+    console.log("📊 Giá thực tế bóc tách được:", prices);
 
+    // HTML hiển thị (Giữ nguyên định dạng Giang muốn)
     const createHTML = (d) => `
     <!DOCTYPE html><html><head><meta charset='utf-8'><style>
         body { margin:0; background:transparent; color:#FFD700; font-family:"Arial Narrow",Arial; font-size:20px; font-weight:bold; overflow:hidden; white-space:nowrap; text-shadow:1px 1px 2px #000; }
@@ -61,12 +59,12 @@ const fs = require('fs');
     </div></body></html>`;
 
     fs.writeFileSync('giaxang_v1.html', createHTML({}));
-    fs.writeFileSync('price.json', JSON.stringify({ ...prices, update: new Date().toLocaleString() }, null, 2));
+    fs.writeFileSync('price.json', JSON.stringify({ ...prices, time: new Date().toLocaleString() }, null, 2));
 
-    console.log("✅ Xong! Kiểm tra file price.json để thấy kết quả.");
+    console.log("✅ Hoàn thành cập nhật từ Webgia!");
 
   } catch (error) {
-    console.error("❌ Lỗi:", error.message);
+    console.error("❌ Lỗi thực thi:", error.message);
   } finally {
     await browser.close();
   }
