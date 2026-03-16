@@ -6,32 +6,25 @@ const fs = require('fs');
   const page = await browser.newPage();
 
   try {
-    console.log("🚀 Đang lấy giá từ Petajico Hà Nội (Nguồn trực tiếp)...");
-    
-    // Truy cập thẳng trang Petajico Hà Nội
+    console.log("🚀 Đang truy cập Petajico Hà Nội...");
     await page.goto('https://petajicohanoi.petrolimex.com.vn/', { 
       waitUntil: 'networkidle', 
       timeout: 60000 
     });
 
-    // Đợi 2 giây để chắc chắn bảng giá đã render
-    await page.waitForTimeout(2000);
+    // Chờ thêm một chút cho bảng giá hiện ra hoàn toàn
+    await page.waitForTimeout(3000);
 
-    // Lấy toàn bộ văn bản trên trang
-    const content = await page.innerText('body');
-    const lines = content.toUpperCase().split('\n');
+    // Lấy tất cả các ô trong bảng giá
+    const cells = await page.$$eval('td', tds => tds.map(td => td.innerText.trim().toUpperCase()));
 
-    // Hàm tìm giá (Ưu tiên lấy số đầu tiên tìm thấy sau từ khóa - thường là Vùng 1)
-    function findPrices(keyword) {
-      for (let i = 0; i < lines.length; i++) {
-        if (lines[i].includes(keyword)) {
-          // Quét trong 5 dòng tiếp theo để tìm con số định dạng XX.XXX
-          for (let j = i; j < i + 5; j++) {
-            if (j >= lines.length) break;
-            const matches = lines[j].match(/(\d{2}\.\d{3})/g); 
-            if (matches && matches.length >= 1) {
-              // Trạm Petajico Hà Nội thường dùng giá Vùng 1
-              return matches[0]; 
+    function findPrice(keyword) {
+      for (let i = 0; i < cells.length; i++) {
+        if (cells[i].includes(keyword)) {
+          // Giá thường nằm ở ô ngay sau hoặc ô kế tiếp có chứa số
+          for (let j = i + 1; j < i + 5; j++) {
+            if (cells[j] && /^\d{2}\.\d{3}$/.test(cells[j])) {
+              return cells[j];
             }
           }
         }
@@ -39,10 +32,15 @@ const fs = require('fs');
       return "00.000";
     }
 
-    // Trích xuất dữ liệu từ Petajico
-    const p95 = findPrices("RON 95-III");
-    const do001 = findPrices("DO 0,001S-V");
-    const do05 = findPrices("DO 0,05S-II");
+    const p95 = findPrice("RON 95-III");
+    const do001 = findPrice("DO 0,001S-V");
+    const do05 = findPrice("DO 0,05S-II");
+
+    console.log(`📊 Kết quả quét: 95: ${p95}, DO-V: ${do001}, DO-II: ${do05}`);
+
+    if (p95 === "00.000") {
+        console.log("⚠️ Cảnh báo: Có thể cấu trúc web thay đổi, đang dùng giá mặc định.");
+    }
 
     const createHTML = (data) => `
     <!DOCTYPE html>
@@ -90,11 +88,10 @@ const fs = require('fs');
     fs.writeFileSync('giaxang_v1.html', createHTML(priceData));
     fs.writeFileSync('price.json', JSON.stringify({ ...priceData, last_update: new Date().toLocaleString() }, null, 2));
 
-    console.log("✅ Đã cập nhật xong từ nguồn Petajico Hà Nội!");
-    console.log("Giá mới:", priceData);
+    console.log("✅ Đã cập nhật xong!");
 
   } catch (error) {
-    console.error("❌ Lỗi:", error.message);
+    console.error("❌ Lỗi thực thi:", error.message);
   } finally {
     await browser.close();
   }
