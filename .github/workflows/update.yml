@@ -29,5 +29,9 @@ jobs:
           git config --global user.name "lebinbon"
           git config --global user.email "lebinbon@users.noreply.github.com"
           git add giaxang_v1.html giaxang_v2.html price.json
+          
+          # Lệnh quan trọng: Tự động lấy dữ liệu mới về trước khi Push
+          git pull --rebase origin main
+          
           git commit -m "Cập nhật giá xăng: $(date)" || exit 0
-          git push
+          git push origin main
