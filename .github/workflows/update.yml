@@ -2,11 +2,11 @@ name: Update Fuel Price
 
 on:
   schedule:
-    - cron: '0 8 * * *' # Chạy tự động hàng ngày
-  workflow_dispatch: # Dòng này cực quan trọng: Cho phép bấm nút chạy bằng tay
+    - cron: '*/10 * * * *' # Tự động chạy mỗi 10 phút
+  workflow_dispatch:      # Nút bấm chạy bằng tay
 
 permissions:
-  contents: write
+  contents: write         # Cấp quyền ghi file để lưu giá xăng
 
 jobs:
   build:
@@ -19,11 +19,9 @@ jobs:
         with:
           node-version: '20'
 
+      # Đây chính là đoạn bạn hỏi, nó nằm sau bước Setup Node.js
       - name: Install dependencies
-        run: npm install playwright fs
-
-      - name: Install Playwright
-        run: npx playwright install chromium --with-deps
+        run: npm install axios cheerio
 
       - name: Run Scraper
         run: node update_price.js
@@ -33,5 +31,5 @@ jobs:
           git config --global user.name "lebinbon"
           git config --global user.email "lebinbon@users.noreply.github.com"
           git add giaxang_v1.html price.json
-          git commit -m "Cập nhật giá xăng: $(date)" || exit 0
+          git commit -m "Auto update: $(date)" || exit 0
           git push origin main --force
