@@ -4,46 +4,53 @@ const fs = require('fs');
 
 async function updatePrice() {
     try {
-        console.log("🚀 Đang cập nhật giá Petrolimex V1, V2, V3...");
+        console.log("🚀 Đang cập nhật dữ liệu xăng dầu Petrolimex (V1, V2, V3)...");
 
         // --- 1. LẤY GIÁ V1 & V2 TỪ WEBGIA ---
         let v1 = { p95: "00.000", do001: "00.000", do05: "00.000" };
         let v2 = { p95: "00.000", do001: "00.000", do05: "00.000" };
 
         try {
-            const resWeb = await axios.get('https://webgia.com/gia-xang-dau/petrolimex/', { headers: { 'User-Agent': 'Mozilla/5.0' } });
+            const resWeb = await axios.get('https://webgia.com/gia-xang-dau/petrolimex/', { 
+                headers: { 'User-Agent': 'Mozilla/5.0' },
+                timeout: 10000 
+            });
             const $ = cheerio.load(resWeb.data);
             $('tr').each((i, el) => {
-                const row = $(el).text().toUpperCase();
+                const rowText = $(el).text().toUpperCase();
                 const matches = $(el).text().match(/(\d{2}\.\d{3})/g);
                 if (matches && matches.length >= 2) {
-                    if (row.includes('95-III')) { v1.p95 = matches[0]; v2.p95 = matches[1]; }
-                    if (row.includes('0,001S-V')) { v1.do001 = matches[0]; v2.do001 = matches[1]; }
-                    if (row.includes('0,05S-II')) { v1.do05 = matches[0]; v2.do05 = matches[1]; }
+                    if (rowText.includes('95-III')) { v1.p95 = matches[0]; v2.p95 = matches[1]; }
+                    if (rowText.includes('0,001S-V')) { v1.do001 = matches[0]; v2.do001 = matches[1]; }
+                    if (rowText.includes('0,05S-II')) { v1.do05 = matches[0]; v2.do05 = matches[1]; }
                 }
             });
-        } catch (e) { console.log("Lỗi Webgia, dùng giá mặc định."); }
+        } catch (e) { console.log("⚠️ Lỗi Webgia, giữ giá 00.000"); }
 
-        // --- 2. LẤY GIÁ V3 TỪ APPSHEET (LINK CSV CỦA GIANG) ---
+        // --- 2. LẤY GIÁ V3 TỪ GOOGLE SHEETS (BẮC NINH) ---
         let v3 = { p95: "00.000", do001: "00.000", do05: "00.000" };
         try {
             const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRsyRFDGG8UiJcYfGgx24Du24cFSiwexQ1BoYpuVaPW4QKfnZ3o5-SMCTp5tKsRGxvlPRih5gY90Pki/pub?gid=0&single=true&output=csv';
-            const resCsv = await axios.get(csvUrl);
-            const rows = resCsv.data.split('\n');
+            const responseCsv = await axios.get(csvUrl);
+            const rows = responseCsv.data.split('\n');
+
             rows.forEach(row => {
-                const cells = row.split(',');
+                // Sử dụng Regex để tách cột tránh lỗi nếu trong tên có dấu phẩy
+                const cells = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); 
                 if (cells.length >= 2) {
-                    const name = cells[0].toUpperCase();
-                    const price = cells[1].trim();
-                    if (name.includes('95-III')) v3.p95 = price;
-                    if (name.includes('0,001S-V')) v3.do001 = price;
-                    if (name.includes('0,05S-II')) v3.do05 = price;
+                    const itemName = cells[0].toUpperCase();
+                    const itemPrice = cells[1].replace(/"/g, '').trim(); // Loại bỏ dấu ngoặc kép nếu có
+
+                    // So khớp linh hoạt hơn
+                    if (itemName.includes('95')) v3.p95 = itemPrice;
+                    if (itemName.includes('0,001') || itemName.includes('0.001')) v3.do001 = itemPrice;
+                    if (itemName.includes('0,05') || itemName.includes('0.05')) v3.do05 = itemPrice;
                 }
             });
-        } catch (e) { console.log("Lỗi V3 Sheets: " + e.message); }
+            console.log("✅ Đã lấy giá V3 thành công.");
+        } catch (e) { console.log("⚠️ Lỗi V3: " + e.message); }
 
-        // --- 3. ĐOẠN HTML MÀ GIANG ĐANG TÌM ĐÂY ---
-        // Mình đưa vào hàm generateHTML để dùng chung cho cả 3 file cho gọn
+        // --- 3. TẠO HTML ---
         const generateHTML = (prices) => `
 <!DOCTYPE html><html><head><meta charset='utf-8'><style>
 body{margin:0;background:transparent;color:#FFD700;font-family:"Arial Narrow",Arial;font-size:20px;font-weight:bold;overflow:hidden;white-space:nowrap;text-shadow:1px 1px 2px #000;}
@@ -61,16 +68,12 @@ body{margin:0;background:transparent;color:#FFD700;font-family:"Arial Narrow",Ar
 <div class="item"><span>DẦU DO 0,05S-II</span><span class="price-value">${prices.do05}</span></div>
 </div></body></html>`;
 
-        // --- 4. XUẤT RA 3 FILE ---
         fs.writeFileSync('giaxang_v1.html', generateHTML(v1));
         fs.writeFileSync('giaxang_v2.html', generateHTML(v2));
         fs.writeFileSync('giaxang_v3.html', generateHTML(v3));
         
-        // Lưu JSON để theo dõi log
-        fs.writeFileSync('price.json', JSON.stringify({ v1, v2, v3, update: new Date().toLocaleString() }, null, 2));
+        console.log("🚀 Cập nhật xong! V3 Check:", v3);
 
-        console.log("✅ Đã cập nhật xong 3 file HTML!");
-    } catch (e) { console.error("❌ Lỗi:", e.message); }
+    } catch (e) { console.error("❌ Lỗi hệ thống:", e.message); }
 }
-
 updatePrice();
