@@ -29,11 +29,6 @@ jobs:
         run: |
           git config --global user.name "lebinbon"
           git config --global user.email "lebinbon@users.noreply.github.com"
-          
-          # LỆNH QUAN TRỌNG: Thêm cả v1 và v2 vào danh sách cập nhật
-          git add giaxang_v1.html giaxang_v2.html price.json
-          
-          git commit -m "Cập nhật giá tự động: $(date)" || exit 0
-          
-          # Ép buộc cập nhật để tránh lỗi kẹt log
+          git add giaxang_v1.html giaxang_v2.html giaxang_v3.html
+          git commit -m "Cập nhật giá V1-V2-V3" || exit 0
           git push origin main --force
