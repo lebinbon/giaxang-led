@@ -9,43 +9,38 @@ const fs = require('fs');
   const page = await context.newPage();
 
   try {
-    console.log("🚀 Đang mở link Petrolimex trên Webgia...");
+    console.log("🚀 Đang lấy giá Vùng 1 từ Webgia...");
     await page.goto('https://webgia.com/gia-xang-dau/petrolimex/', { 
       waitUntil: 'networkidle', 
       timeout: 60000 
     });
 
-    // Chờ 5 giây để bảng giá hiện ra hẳn (quan trọng vì máy chủ GitHub đôi khi lag)
+    // Đợi 5 giây cho bảng giá render
     await page.waitForTimeout(5000);
 
     const prices = await page.evaluate(() => {
       const results = { p95: "00.000", do001: "00.000", do05: "00.000" };
-      
-      // Lấy tất cả các hàng <tr> trong bảng
       const rows = Array.from(document.querySelectorAll('tr'));
 
       rows.forEach(row => {
-        const text = row.innerText.toUpperCase();
         const cells = Array.from(row.querySelectorAll('td'));
-        
-        // Nếu hàng có ít nhất 2 cột
+        // cells[0]: Tên, cells[1]: Vùng 1, cells[2]: Vùng 2
         if (cells.length >= 2) {
+          const name = cells[0].innerText.toUpperCase();
           const v1 = cells[1].innerText.trim();
-          
-          // Kiểm tra nếu giá trị ở cột Vùng 1 là định dạng số (có dấu chấm)
-          if (/\d{2}\.\d{3}/.test(v1)) {
-            if (text.includes('RON 95-III')) results.p95 = v1;
-            if (text.includes('0,001S-V')) results.do001 = v1;
-            if (text.includes('0,05S-II')) results.do05 = v1;
-          }
+
+          // Kiểm tra tên rút gọn để chính xác nhất
+          if (name.includes('95-III')) results.p95 = v1;
+          if (name.includes('0,001S-V')) results.do001 = v1;
+          if (name.includes('0,05S-II')) results.do05 = v1;
         }
       });
       return results;
     });
 
-    console.log("📊 Kết quả thực tế:", prices);
+    console.log("📊 Kết quả Vùng 1:", prices);
 
-    const createHTML = (d) => `
+    const createHTML = (p) => `
     <!DOCTYPE html><html><head><meta charset='utf-8'><style>
         body { margin:0; background:transparent; color:#FFD700; font-family:"Arial Narrow",Arial; font-size:20px; font-weight:bold; overflow:hidden; white-space:nowrap; text-shadow:1px 1px 2px #000; }
         .container { width:100%; height:100vh; display:flex; align-items:center; justify-content:center; padding:0 5px; box-sizing:border-box; }
@@ -55,20 +50,19 @@ const fs = require('fs');
         .separator { color:#FFFFFF; opacity:0.6; margin:0 8px; }
     </style></head><body><div class="container">
         <span class="label">GIÁ BÁN LẺ (Đ/L):</span>
-        <div class="item"><span>XĂNG RON 95-III</span><span class="price-value">${prices.p95}</span></div>
+        <div class="item"><span>XĂNG RON 95-III</span><span class="price-value">${p.p95}</span></div>
         <span class="separator">|</span>
-        <div class="item"><span>DẦU DO 0,001S-V</span><span class="price-value">${prices.do001}</span></div>
+        <div class="item"><span>DẦU DO 0,001S-V</span><span class="price-value">${p.do001}</span></div>
         <span class="separator">|</span>
-        <div class="item"><span>DẦU DO 0,05S-II</span><span class="price-value">${prices.do05}</span></div>
+        <div class="item"><span>DẦU DO 0,05S-II</span><span class="price-value">${p.do05}</span></div>
     </div></body></html>`;
 
-    fs.writeFileSync('giaxang_v1.html', createHTML({}));
-    fs.writeFileSync('price.json', JSON.stringify({ ...prices, update: new Date().toLocaleString() }, null, 2));
+    fs.writeFileSync('giaxang_v1.html', createHTML(prices));
+    fs.writeFileSync('price.json', JSON.stringify({ ...prices, type: "Vùng 1", update: new Date().toLocaleString() }, null, 2));
 
     console.log("✅ Cập nhật file thành công!");
-
   } catch (error) {
-    console.error("❌ Lỗi quét Webgia:", error.message);
+    console.error("❌ Lỗi:", error.message);
   } finally {
     await browser.close();
   }
