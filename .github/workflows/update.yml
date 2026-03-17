@@ -26,10 +26,13 @@ jobs:
       - name: Run Scraper
         run: node update_price.js
 
-      - name: Commit and Push
+    - name: Commit and Push
         run: |
           git config --global user.name "lebinbon"
           git config --global user.email "lebinbon@users.noreply.github.com"
-          git add giaxang_v1.html price.json
+          
+          # QUAN TRỌNG: Phải có cả giaxang_v1.html và giaxang_v2.html ở đây
+          git add giaxang_v1.html giaxang_v2.html price.json
+          
           git commit -m "Auto update: $(date)" || exit 0
           git push origin main --force
