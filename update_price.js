@@ -4,7 +4,7 @@ const fs = require('fs');
 
 async function updatePrice() {
     try {
-        console.log("🚀 Đang cập nhật giá Vùng 1 & Vùng 2...");
+        console.log("🚀 Đang cập nhật giá song song V1 và V2...");
         const { data } = await axios.get('https://webgia.com/gia-xang-dau/petrolimex/', {
             headers: { 'User-Agent': 'Mozilla/5.0' },
             timeout: 15000
@@ -16,12 +16,12 @@ async function updatePrice() {
 
         $('tr').each((i, el) => {
             const rowText = $(el).text().toUpperCase();
-            // Tìm tất cả các số có dạng XX.XXX trong hàng
+            // Tìm tất cả các số dạng XX.XXX trong hàng
             const matches = $(el).text().match(/(\d{2}\.\d{3})/g);
 
             if (matches && matches.length >= 2) {
-                const val1 = matches[0]; // Số đầu tiên là Vùng 1
-                const val2 = matches[1]; // Số thứ hai là Vùng 2
+                const val1 = matches[0]; // Vùng 1
+                const val2 = matches[1]; // Vùng 2
 
                 if (rowText.includes('95-III')) { v1.p95 = val1; v2.p95 = val2; }
                 if (rowText.includes('0,001S-V')) { v1.do001 = val1; v2.do001 = val2; }
@@ -46,18 +46,14 @@ body{margin:0;background:transparent;color:#FFD700;font-family:"Arial Narrow",Ar
 <div class="item"><span>DẦU DO 0,05S-II</span><span class="price-value">${prices.do05}</span></div>
 </div></body></html>`;
 
+        // Ghi đồng thời cả 2 file
         fs.writeFileSync('giaxang_v1.html', generateHTML(v1));
         fs.writeFileSync('giaxang_v2.html', generateHTML(v2));
         fs.writeFileSync('price.json', JSON.stringify({ v1, v2, update: new Date().toLocaleString() }, null, 2));
 
-        console.log("✅ Cập nhật thành công!");
-        console.log("📊 V1 (Check):", v1.p95);
-        console.log("📊 V2 (Check):", v2.p95);
-
+        console.log("✅ Đã cập nhật xong cả v1 và v2!");
     } catch (e) {
         console.error("❌ Lỗi:", e.message);
     }
 }
-
-// Lệnh kích hoạt code chạy (Thiếu dòng này code sẽ không thực thi)
 updatePrice();
