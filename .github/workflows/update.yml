@@ -2,8 +2,9 @@ name: Update Fuel Price
 
 on:
   schedule:
-    - cron: '0 8 * * *' # Chạy tự động hàng ngày
-  workflow_dispatch: # Dòng này cực quan trọng: Cho phép bấm nút chạy bằng tay
+    # Chạy mỗi 10 phút (GitHub Actions tối thiểu là 5-10 phút để tránh bị khóa tài khoản)
+    - cron: '*/10 * * * *'
+  workflow_dispatch: # Vẫn giữ nút bấm tay để test
 
 permissions:
   contents: write
@@ -11,6 +12,8 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Thêm chế độ timeout để nếu web kẹt thì nó tự ngắt, không tốn thời gian
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       
@@ -33,5 +36,8 @@ jobs:
           git config --global user.name "lebinbon"
           git config --global user.email "lebinbon@users.noreply.github.com"
           git add giaxang_v1.html price.json
-          git commit -m "Cập nhật giá xăng: $(date)" || exit 0
+          
+          # Chỉ commit nếu có sự thay đổi giá thực sự để tránh làm rác lịch sử
+          git commit -m "Cập nhật giá mới: $(date)" || exit 0
+          
           git push origin main --force
