@@ -51,18 +51,19 @@ async function updatePrice() {
         } catch (e) { console.log("Lỗi V3: " + e.message); }
 
         // --- 3. HÀM TẠO HTML ---
+      // --- 3. HÀM TẠO HTML (CẬP NHẬT THEO YÊU CẦU CỦA GIANG) ---
         const generateHTML = (prices) => `
 <!DOCTYPE html><html><head><meta charset='utf-8'><style>
 body{margin:0;background:transparent;color:#FFD700;font-family:"Arial Narrow",Arial;font-size:20px;font-weight:bold;overflow:hidden;white-space:nowrap;text-shadow:1px 1px 2px #000;}
 .container{width:100%;height:100vh;display:flex;align-items:center;justify-content:center;}
 .label{color:#FFFFFF;margin-right:10px;}
-.price-value{color:#00FF00;margin-left:10px;}
+.price-value{color:#00FF00;margin-left:5px;} /* Khoảng cách nhỏ sau dấu hai chấm */
 .separator{color:#FFFFFF;opacity:0.6;margin:0 15px;}
 </style></head><body><div class="container">
 <span class="label">GIÁ BÁN LẺ (Đ/L):</span>
-<span>RON 95-III</span><span class="price-value">${prices.p95}</span><span class="separator">|</span>
-<span>DO 0,001S-V</span><span class="price-value">${prices.do001}</span><span class="separator">|</span>
-<span>DO 0,05S-II</span><span class="price-value">${prices.do05}</span>
+<span>XĂNG RON 95-III:</span><span class="price-value">${prices.p95}</span><span class="separator">|</span>
+<span>DẦU DO 0,001S-V:</span><span class="price-value">${prices.do001}</span><span class="separator">|</span>
+<span>DẦU DO 0,05S-II:</span><span class="price-value">${prices.do05}</span>
 </div></body></html>`;
 
         fs.writeFileSync('giaxang_v1.html', generateHTML(v1));
