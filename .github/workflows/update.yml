@@ -2,40 +2,36 @@ name: Update Fuel Price
 
 on:
   schedule:
-    - cron: '*/10 * * * *'
-  workflow_dispatch:
+    - cron: '0 8 * * *' # Chạy tự động hàng ngày
+  workflow_dispatch: # Dòng này cực quan trọng: Cho phép bấm nút chạy bằng tay
+
+permissions:
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4 # Nâng lên v4
+      - uses: actions/checkout@v4
       
       - name: Setup Node.js
-        uses: actions/setup-node@v4 # Nâng lên v4
+        uses: actions/setup-node@v4
         with:
-          node-version: '24' # Dùng bản mới nhất theo khuyến nghị của GitHub
-          
+          node-version: '20'
+
       - name: Install dependencies
-        run: |
-          npm install playwright
-          npx playwright install chromium
-          
+        run: npm install playwright fs
+
+      - name: Install Playwright
+        run: npx playwright install chromium --with-deps
+
       - name: Run Scraper
         run: node update_price.js
-        
-            - name: Commit and Push
+
+      - name: Commit and Push
         run: |
           git config --global user.name "lebinbon"
           git config --global user.email "lebinbon@users.noreply.github.com"
-          
-          # Buộc cập nhật dữ liệu mới nhất từ remote
-          git fetch origin main
-          
-          git add giaxang_v1.html giaxang_v2.html price.json
-          
-          # Commit nếu có thay đổi, nếu không thì bỏ qua
-          git commit -m "Cập nhật giá xăng: $(date)" || echo "Không có thay đổi để commit"
-          
-          # ÉP BUỘC đẩy dữ liệu lên để tránh lỗi fetch first
+          git add giaxang_v1.html price.json
+          git commit -m "Cập nhật giá xăng: $(date)" || exit 0
           git push origin main --force
