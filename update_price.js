@@ -61,18 +61,31 @@ async function updatePrice() {
             const rows = response.data.values;
             if (rows) {
                 rows.forEach(row => {
-                    const name = row[0] ? row[0].toUpperCase() : "";
+                   if (rows) {
+                rows.forEach(row => {
+                    const name = row[0] ? row[0].toUpperCase().trim() : "";
                     const price = formatPrice(row[1]);
 
-                    // Luôn ưu tiên lấy giá cho Bắc Ninh
-                    if (name.includes('95') && !name.includes('V1') && !name.includes('V2')) v3.p95 = price;
-                    if (name.includes('0,001') && !name.includes('V1') && !name.includes('V2')) v3.do001 = price;
-                    if (name.includes('0,05') && !name.includes('V1') && !name.includes('V2')) v3.do05 = price;
+                    // 1. CHỈNH GIÁ CHO BẮC NINH (Những dòng không chứa V1, V2)
+                    if (!name.includes('V1') && !name.includes('V2')) {
+                        if (name.includes('95')) v3.p95 = price;
+                        if (name.includes('0,001') || name.includes('0.001')) v3.do001 = price;
+                        if (name.includes('0,05') || name.includes('0.05')) v3.do05 = price;
+                    }
 
-                    // DỰ PHÒNG: Nếu web lỗi (v1.p95 === "0"), lấy giá V1, V2 từ Sheet
-                    if (v1.p95 === "0" && name.includes('V1') && name.includes('95')) v1.p95 = price;
-                    if (v2.p95 === "0" && name.includes('V2') && name.includes('95')) v2.p95 = price;
-                    // ... các dòng dự phòng khác tương tự
+                    // 2. DỰ PHÒNG CHO VÙNG 1 (Lấy từ Sheet nếu Web lỗi)
+                    if (name.includes('V1')) {
+                        if (v1.p95 === "0" && name.includes('95')) v1.p95 = price;
+                        if (v1.do001 === "0" && (name.includes('0,001') || name.includes('0.001'))) v1.do001 = price;
+                        if (v1.do05 === "0" && (name.includes('0,05') || name.includes('0.05'))) v1.do05 = price;
+                    }
+
+                    // 3. DỰ PHÒNG CHO VÙNG 2 (Lấy từ Sheet nếu Web lỗi)
+                    if (name.includes('V2')) {
+                        if (v2.p95 === "0" && name.includes('95')) v2.p95 = price;
+                        if (v2.do001 === "0" && (name.includes('0,001') || name.includes('0.001'))) v2.do001 = price;
+                        if (v2.do05 === "0" && (name.includes('0,05') || name.includes('0.05'))) v2.do05 = price;
+                    }
                 });
             }
             console.log("✅ Đã đồng bộ Sheet qua API v4.");
