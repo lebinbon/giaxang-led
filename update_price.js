@@ -3,10 +3,10 @@ const axios = require('axios');
 const fs = require('fs');
 const cheerio = require('cheerio');
 
-// CẤU HÌNH CHUẨN ĐÃ KIỂM TRA
-const SHEET_ID = '1evOQY_2mYSNwrd6dH9N7aUwFV0IpVH5l37rRKc1sRM'; 
-const API_KEY = 'AIzaSyADcR1RizfcOcA2-rZREhBrZKp_e5-_-so'; 
-const RANGE = 'A1:B20'; // Bỏ tên Sheet1! để API tự lấy Tab đầu tiên
+// Thử cấu hình tối giản này
+const SHEET_ID = '1evOQY_2mYSNwrd6dH9N7aUwFV0IpVH5l37rRKc1sRM';
+const API_KEY = 'AIzaSyADcR1RizfcOcA2-rZREhBrZKp_e5-_-so';
+const RANGE = 'Sheet1!A2:B15'; // Chỉ định đích danh Sheet1
 
 function formatPrice(price) {
     if (!price || price === "" || price === "0") return "0";
