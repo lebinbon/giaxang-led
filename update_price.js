@@ -77,7 +77,7 @@ async function updatePrice() {
                 do001: p.do001 === "0" ? "00.000" : p.do001,
                 do05: p.do05 === "0" ? "00.000" : p.do05
             };
-            return `<!DOCTYPE html><html><head><meta charset='utf-8'><style>body{margin:0;background:transparent;color:#FFD700;font-family:"Arial Narrow",Arial;font-size:20px;font-weight:bold;overflow:hidden;display:flex;align-items:center;justify-content:center;height:100vh;text-shadow:1px 1px 2px #000;}.l{color:#FFFFFF;margin-right:10px;}.v{color:#00FF00;margin-left:5px;}.s{color:#FFFFFF;opacity:0.6;margin:0 15px;}</style></head><body><div><span class="l">${label}:</span>RON 95-III: <span class="v">${fp.p95}</span><span class="s">|</span>DO 0,001S-V: <span class="v">${fp.do001}</span><span class="s">|</span>DO 0,05S-II: <span class="v">${fp.do05}</span></div></body></html>`;
+             return `<!DOCTYPE html><html><head><meta charset='utf-8'><style>body{margin:0;background:transparent;color:#FFD700;font-family:"Arial Narrow",Arial;font-size:20px;font-weight:bold;overflow:hidden;display:flex;align-items:center;justify-content:center;height:100vh;text-shadow:1px 1px 2px #000;}.l{color:#FFFFFF;margin-right:10px;}.v{color:#00FF00;margin-left:5px;}.s{color:#FFFFFF;opacity:0.6;margin:0 15px;}</style></head><body><div class="container"><span class="l">GIÁ BÁN LẺ (Đ/L):</span>XĂNG RON 95-III: <span class="v">${fp.p95}</span><span class="s">|</span>DẦU DO 0,001S-V: <span class="v">${fp.do001}</span><span class="s">|</span>DẦU DO 0,05S-II: <span class="v">${fp.do05}</span></div></body></html>`;
         };
 
         fs.writeFileSync('giaxang_v1.html', draw(v1, "VÙNG 1"));
