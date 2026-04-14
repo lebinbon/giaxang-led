@@ -5,7 +5,7 @@ const cheerio = require('cheerio');
 
 // --- CẤU HÌNH ---
 const SHEET_ID = '1evOQY_2mYSNwrd6dH9N7aUwFV0IpVH5l37rRKc1sRM'; 
-const API_KEY = 'AIzaSy...'; // DÁN API KEY BẠN VỪA TẠO VÀO ĐÂY
+const API_KEY = 'AIzaSyADcR1RizfcOcA2-rZREhBrZKp_e5-_-so'; // DÁN API KEY BẠN VỪA TẠO VÀO ĐÂY
 const RANGE = 'Sheet1!A:B'; 
 
 function formatPrice(price) {
