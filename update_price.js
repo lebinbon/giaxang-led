@@ -18,6 +18,7 @@ async function updatePrice() {
         let v3 = { p95: "0", do001: "0", do05: "0" };
 
         // --- BƯỚC 1: LẤY GIÁ TỪ WEB GIAXANGHOMNAY.COM ---
+        // --- BƯỚC 1: LẤY GIÁ TỪ WEB GIAXANGHOMNAY.COM ---
         try {
             const resWeb = await axios.get('https://giaxanghomnay.com/gia-xang-hom-nay', { 
                 headers: { 'User-Agent': 'Mozilla/5.0' } 
@@ -25,26 +26,24 @@ async function updatePrice() {
             const $ = cheerio.load(resWeb.data);
             
             $('tr').each((i, el) => {
-                const rowText = $(el).text().toUpperCase();
                 const cols = $(el).find('td');
-                
                 if (cols.length >= 3) {
-                    const priceV1 = formatPrice($(cols[1]).text().trim());
-                    const priceV2 = formatPrice($(cols[2]).text().trim());
+                    const rowText = $(el).text().toUpperCase();
+                    // Lấy chính xác giá cột 1 (Vùng 1) và cột 2 (Vùng 2)
+                    const p1 = formatPrice($(cols[1]).text().trim());
+                    const p2 = formatPrice($(cols[2]).text().trim());
 
-                    if (rowText.includes('RON 95-III')) {
-                        v1.p95 = priceV1;
-                        v2.p95 = priceV2;
-                    } else if (rowText.includes('0,001S-V')) {
-                        v1.do001 = priceV1;
-                        v2.do001 = priceV2;
-                    } else if (rowText.includes('0,05S-II')) {
-                        v1.do05 = priceV1;
-                        v2.do05 = priceV2;
+                    // Kiểm tra và gán giá - Chỉ gán nếu p1 khác "0"
+                    if (rowText.includes('RON 95-III') && p1 !== "0") {
+                        v1.p95 = p1; v2.p95 = p2;
+                    } else if (rowText.includes('0,001S-V') && p1 !== "0") {
+                        v1.do001 = p1; v2.do001 = p2;
+                    } else if (rowText.includes('0,05S-II') && p1 !== "0") {
+                        v1.do05 = p1; v2.do05 = p2;
                     }
                 }
             });
-            console.log("✅ Đã cập nhật giá Vùng 1 & Vùng 2 từ Web.");
+            console.log("✅ Vùng 1: " + v1.p95 + " | Vùng 2: " + v2.p95);
         } catch (e) { console.log("⚠️ Lỗi Web: " + e.message); }
 
         // --- BƯỚC 2: LẤY GIÁ TỪ APPSHEET (DÀNH CHO BẮC NINH) ---
