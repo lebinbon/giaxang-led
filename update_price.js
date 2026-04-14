@@ -16,28 +16,29 @@ async function updatePrice() {
         let v2 = { p95: "0", do001: "0", do05: "0" };
         let v3 = { p95: "0", do001: "0", do05: "0" };
 
-        // --- BƯỚC 1: LẤY GIÁ TỪ WEB (QUÉT TẤT CẢ CÁC BẢNG ĐỂ TÌM DỮ LIỆU CHUẨN) ---
+        // --- BƯỚC 1: LẤY GIÁ TỪ WEB ---
         try {
             const resWeb = await axios.get('https://giaxanghomnay.com/gia-xang-hom-nay', { 
                 headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' } 
             });
             const $ = cheerio.load(resWeb.data);
             
-            $('tr').each((i, el) => {
-                const cols = $(el).find('td');
-                // Chỉ xử lý dòng có ít nhất 3 cột (Tên mặt hàng | Vùng 1 | Vùng 2)
-                if (cols.length >= 3) {
-                    const rowText = $(el).text().toUpperCase();
-                    const p1 = formatPrice($(cols[1]).text().trim());
-                    const p2 = formatPrice($(cols[2]).text().trim());
+            // Quét tất cả các bảng để tránh bị popup chặn
+            $('table').each((index, table) => {
+                $(table).find('tr').each((i, el) => {
+                    const cols = $(el).find('td');
+                    if (cols.length >= 3) {
+                        const rowText = $(el).text().toUpperCase();
+                        const p1 = formatPrice($(cols[1]).text().trim());
+                        const p2 = formatPrice($(cols[2]).text().trim());
 
-                    // Chỉ gán nếu p1 và p2 thực sự có giá (khác 0)
-                    if (p1 !== "0" && p2 !== "0") {
-                        if (rowText.includes('RON 95-III')) { v1.p95 = p1; v2.p95 = p2; }
-                        else if (rowText.includes('0,001S-V')) { v1.do001 = p1; v2.do001 = p2; }
-                        else if (rowText.includes('0,05S-II')) { v1.do05 = p1; v2.do05 = p2; }
+                        if (p1 !== "0" && p2 !== "0") {
+                            if (rowText.includes('RON 95-III')) { v1.p95 = p1; v2.p95 = p2; }
+                            else if (rowText.includes('0,001S-V')) { v1.do001 = p1; v2.do001 = p2; }
+                            else if (rowText.includes('0,05S-II')) { v1.do05 = p1; v2.do05 = p2; }
+                        }
                     }
-                }
+                });
             });
         } catch (e) { console.log("⚠️ Lỗi Web: " + e.message); }
 
@@ -52,7 +53,6 @@ async function updatePrice() {
                 if (cells.length >= 2) {
                     const name = cells[0].toUpperCase().trim();
                     const price = formatPrice(cells[1].replace(/"/g, '').trim());
-
                     if (price !== "0") {
                         if (!name.includes('V1') && !name.includes('V2')) {
                             if (name.includes('95')) v3.p95 = price;
@@ -64,7 +64,7 @@ async function updatePrice() {
             });
         } catch (e) { console.log("⚠️ Lỗi AppSheet: " + e.message); }
 
-        // --- BƯỚC 3: XUẤT FILE HTML (MẪU CHUẨN CỦA BẠN) ---
+        // --- BƯỚC 3: XUẤT FILE HTML (GIỮ NGUYÊN 100% MẪU CỦA BẠN) ---
         const draw = (p) => {
             const fp = {
                 p95: p.p95 === "0" ? "00.000" : p.p95,
@@ -78,7 +78,7 @@ async function updatePrice() {
         fs.writeFileSync('giaxang_v2.html', draw(v2));
         fs.writeFileSync('giaxang_v3.html', draw(v3));
 
-        console.log(`✅ Hoàn tất! V1: ${v1.p95} | V2: ${v2.p95} | BN: ${v3.p95}`);
+        console.log("✅ Hoàn tất cập nhật!");
     } catch (error) { console.log("Lỗi: " + error.message); }
 }
 updatePrice();
