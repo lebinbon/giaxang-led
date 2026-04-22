@@ -1,1 +1,47 @@
-<!DOCTYPE html><html><head><meta charset='utf-8'><style>body{margin:0;background:transparent;color:#FFD700;font-family:"Arial Narrow",Arial;font-size:20px;font-weight:bold;overflow:hidden;display:flex;align-items:center;justify-content:center;height:100vh;text-shadow:1px 1px 2px #000;}.l{color:#FFFFFF;margin-right:10px;}.v{color:#00FF00;margin-left:5px;}.s{color:#FFFFFF;opacity:0.6;margin:0 15px;}</style></head><body><div class="container"><span class="l">GIÁ BÁN LẺ (Đ/L):</span>XĂNG RON 95-III: <span class="v">23.240</span><span class="s">|</span>DẦU DO 0,001S-V: <span class="v">29.310</span><span class="s">|</span>DẦU DO 0,05S-II: <span class="v">27.950</span></div></body></html>
+<!DOCTYPE html><html><head><meta charset='utf-8'><style>
+                body {
+                    margin: 0;
+                    background: transparent;
+                    color: #FFD700;
+                    font-family: "Arial Narrow", Arial, sans-serif;
+                    font-size: 24px; /* Cỡ chữ chuẩn cho màn 1040 */
+                    font-weight: bold;
+                    overflow: hidden;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    height: 100vh;
+                    text-shadow: 1px 1px 2px #000;
+                }
+                .container {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    white-space: nowrap; /* Chống xuống dòng tuyệt đối */
+                    gap: 10px;
+                }
+                .l { color: #FFFFFF; }
+                .v { color: #00FF00; margin-left: 5px; }
+                .s { color: #FFFFFF; opacity: 0.6; }
+
+                /* TỰ THÍCH NGHI CHO MÀN HÌNH NHỎ (640x240) */
+                @media (max-width: 700px) {
+                    body {
+                        font-size: 17px; /* Co nhỏ chữ lại để vừa 1 dòng trên màn 640 */
+                    }
+                    .container {
+                        gap: 5px; /* Thu hẹp khoảng cách giữa các phần tử */
+                    }
+                    .s { margin: 0 2px; } /* Thu nhỏ khoảng cách dấu gạch đứng */
+                }
+            </style></head>
+            <body>
+                <div class="container">
+                    <span class="l">GIÁ BÁN LẺ (Đ/L):</span>
+                    <span>RON 95-III:<span class="v">23.240</span></span>
+                    <span class="s">|</span>
+                    <span>0,001S-V:<span class="v">29.310</span></span>
+                    <span class="s">|</span>
+                    <span>0,05S-II:<span class="v">27.950</span></span>
+                </div>
+            </body></html>
