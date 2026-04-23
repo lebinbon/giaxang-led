@@ -115,7 +115,7 @@ async function updatePrice() {
                 /* TỰ THÍCH NGHI CHO MÀN HÌNH NHỎ (640x240) */
                 @media (max-width: 700px) {
                     body {
-                        font-size: 17px; /* Co nhỏ chữ lại để vừa 1 dòng trên màn 640 */
+                        font-size: 14px; /* Co nhỏ chữ lại để vừa 1 dòng trên màn 640 */
                     }
                     .container {
                         gap: 5px; /* Thu hẹp khoảng cách giữa các phần tử */
