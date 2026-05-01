@@ -126,7 +126,7 @@ async function updatePrice() {
             <body>
                 <div class="container">
                     <span class="l">GIÁ BÁN LẺ (Đ/L):</span>
-                    <span>XĂNG RON 95-III:<span class="v">${fp.p95}</span></span>
+                    <span>XĂNG RON 95-V:<span class="v">${fp.p95}</span></span>
                     <span class="s">|</span>
                     <span>DẦU DO 0,001S-V:<span class="v">${fp.do001}</span></span>
                     <span class="s">|</span>
