@@ -15,7 +15,7 @@ async function updatePrice() {
         console.log("🚀 Khởi động logic: Ưu tiên AppSheet -> Backup Webgia...");
 
         let v1 = { p95: "0", do001: "0", do05: "0" };
-        let v2 = { p95: "0", do001: "0", do05: "0" }; // v2 dùng cho E10 RON 95-III
+        let v2 = { p95: "0", do001: "0", do05: "0" }; // Dành cho V2: E10 RON 95-III
         let v3 = { p95: "0", do001: "0", do05: "0" };
 
         // --- BƯỚC 1: LẤY DỮ LIỆU TỪ APPSHEET ---
@@ -36,7 +36,7 @@ async function updatePrice() {
                         if (name.includes('0,001')) v1.do001 = price;
                         if (name.includes('0,05')) v1.do05 = price;
                     } else if (name.includes('V2')) {
-                        if (name.includes('95')) v2.p95 = price; // AppSheet Giang nhập cho V2
+                        if (name.includes('95')) v2.p95 = price; 
                         if (name.includes('0,001')) v2.do001 = price;
                         if (name.includes('0,05')) v2.do05 = price;
                     } else {
@@ -49,7 +49,7 @@ async function updatePrice() {
             console.log("✅ Đã kiểm tra xong AppSheet.");
         } catch (e) { console.log("Lỗi đọc Sheets"); }
 
-        // --- BƯỚC 2: KIỂM TRA WEB GIA (Xử lý riêng mặt hàng cho V2) ---
+        // --- BƯỚC 2: KIỂM TRA WEB GIA ---
         try {
             const resWeb = await axios.get('https://webgia.com/gia-xang-dau/petrolimex/', { headers: { 'User-Agent': 'Mozilla/5.0' } });
             const $ = cheerio.load(resWeb.data);
@@ -57,16 +57,15 @@ async function updatePrice() {
                 const row = $(el).text().toUpperCase();
                 const m = $(el).text().match(/(\d{2}\.\d{3})/g);
                 if (m && m.length >= 2) {
-                    // Lấy giá RON 95-V cho V1 và V3
+                    // Giá 95-V cho V1, V3
                     if (row.includes('95-V')) { 
                         if (v1.p95 === "0") v1.p95 = m[0]; 
                         if (v3.p95 === "0") v3.p95 = m[2] || m[0]; 
                     }
-                    // LẤY RIÊNG E10 RON 95-III CHO V2 NẾU APPSHEET TRỐNG
+                    // GIÁ E10 RON 95-III RIÊNG CHO V2
                     if (row.includes('E10 RON 95-III')) {
-                        if (v2.p95 === "0") v2.p95 = m[1]; // m[1] thường là giá Vùng 2 trên Webgia
+                        if (v2.p95 === "0") v2.p95 = m[1]; 
                     }
-                    
                     if (row.includes('0,001S-V')) { 
                         if (v1.do001 === "0") v1.do001 = m[0]; 
                         if (v2.do001 === "0") v2.do001 = m[1]; 
@@ -87,8 +86,7 @@ async function updatePrice() {
             do05: p.do05 === "0" ? "00.000" : p.do05
         });
 
-        // Hàm draw có thêm tham số label để đổi tên mặt hàng xăng
-        const draw = (p, xangLabel) => {
+        const draw = (p, labelXang) => {
             const fp = finalPrice(p);
             return `<!DOCTYPE html><html><head><meta charset='utf-8'><style>
                 body {
@@ -116,16 +114,21 @@ async function updatePrice() {
                 .v { color: #00FF00; margin-left: 5px; }
                 .s { color: #FFFFFF; opacity: 0.6; }
 
+                /* TƯƠNG THÍCH MÀN 640x240 */
                 @media (max-width: 700px) {
-                    body { font-size: 14px; }
-                    .container { gap: 5px; }
+                    body {
+                        font-size: 13px; /* Đã hạ xuống 13px cho an toàn */
+                    }
+                    .container {
+                        gap: 5px;
+                    }
                     .s { margin: 0 2px; }
                 }
             </style></head>
             <body>
                 <div class="container">
                     <span class="l">GIÁ BÁN LẺ (Đ/L):</span>
-                    <span>${xangLabel}:<span class="v">${fp.p95}</span></span>
+                    <span>${labelXang}:<span class="v">${fp.p95}</span></span>
                     <span class="s">|</span>
                     <span>DẦU DO 0,001S-V:<span class="v">${fp.do001}</span></span>
                     <span class="s">|</span>
@@ -134,7 +137,6 @@ async function updatePrice() {
             </body></html>`;
         };
 
-        // Xuất file với nhãn tương ứng
         fs.writeFileSync('giaxang_v1.html', draw(v1, 'XĂNG RON 95-V'));
         fs.writeFileSync('giaxang_v2.html', draw(v2, 'XĂNG E10 RON 95-III'));
         fs.writeFileSync('giaxang_v3.html', draw(v3, 'XĂNG RON 95-V'));
