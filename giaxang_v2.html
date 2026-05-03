@@ -4,7 +4,7 @@
                     background: transparent;
                     color: #FFD700;
                     font-family: "Arial Narrow", Arial, sans-serif;
-                    font-size: 24px; /* Cỡ chữ chuẩn cho màn 1040 */
+                    font-size: 24px;
                     font-weight: bold;
                     overflow: hidden;
                     display: flex;
@@ -17,31 +17,26 @@
                     display: flex;
                     flex-direction: row;
                     align-items: center;
-                    white-space: nowrap; /* Chống xuống dòng tuyệt đối */
+                    white-space: nowrap;
                     gap: 10px;
                 }
                 .l { color: #FFFFFF; }
                 .v { color: #00FF00; margin-left: 5px; }
                 .s { color: #FFFFFF; opacity: 0.6; }
 
-                /* TỰ THÍCH NGHI CHO MÀN HÌNH NHỎ (640x240) */
                 @media (max-width: 700px) {
-                    body {
-                        font-size: 14px; /* Co nhỏ chữ lại để vừa 1 dòng trên màn 640 */
-                    }
-                    .container {
-                        gap: 5px; /* Thu hẹp khoảng cách giữa các phần tử */
-                    }
-                    .s { margin: 0 2px; } /* Thu nhỏ khoảng cách dấu gạch đứng */
+                    body { font-size: 14px; }
+                    .container { gap: 5px; }
+                    .s { margin: 0 2px; }
                 }
             </style></head>
             <body>
                 <div class="container">
                     <span class="l">GIÁ BÁN LẺ (Đ/L):</span>
-                    <span>XĂNG RON 95-V:<span class="v">24.230</span></span>
+                    <span>XĂNG E10 RON 95-III:<span class="v">23.390</span></span>
                     <span class="s">|</span>
-                    <span>DẦU DO 0,001S-V:<span class="v">32.940</span></span>
+                    <span>DẦU DO 0,001S-V:<span class="v">29.630</span></span>
                     <span class="s">|</span>
-                    <span>DẦU DO 0,05S-II:<span class="v">31.660</span></span>
+                    <span>DẦU DO 0,05S-II:<span class="v">28.270</span></span>
                 </div>
             </body></html>
