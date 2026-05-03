@@ -24,9 +24,14 @@
                 .v { color: #00FF00; margin-left: 5px; }
                 .s { color: #FFFFFF; opacity: 0.6; }
 
+                /* TƯƠNG THÍCH MÀN 640x240 */
                 @media (max-width: 700px) {
-                    body { font-size: 14px; }
-                    .container { gap: 5px; }
+                    body {
+                        font-size: 13px; /* Đã hạ xuống 13px cho an toàn */
+                    }
+                    .container {
+                        gap: 5px;
+                    }
                     .s { margin: 0 2px; }
                 }
             </style></head>
