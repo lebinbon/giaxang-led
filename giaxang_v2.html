@@ -1,37 +1,18 @@
 <!DOCTYPE html><html><head><meta charset='utf-8'><style>
                 body {
-                    margin: 0;
-                    background: transparent;
-                    color: #FFD700;
+                    margin: 0; background: transparent; color: #FFD700;
                     font-family: "Arial Narrow", Arial, sans-serif;
-                    font-size: 24px;
-                    font-weight: bold;
-                    overflow: hidden;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    height: 100vh;
-                    text-shadow: 1px 1px 2px #000;
+                    font-size: 24px; font-weight: bold; overflow: hidden;
+                    display: flex; align-items: center; justify-content: center;
+                    height: 100vh; text-shadow: 1px 1px 2px #000;
                 }
-                .container {
-                    display: flex;
-                    flex-direction: row;
-                    align-items: center;
-                    white-space: nowrap;
-                    gap: 10px;
-                }
+                .container { display: flex; flex-direction: row; align-items: center; white-space: nowrap; gap: 10px; }
                 .l { color: #FFFFFF; }
                 .v { color: #00FF00; margin-left: 5px; }
                 .s { color: #FFFFFF; opacity: 0.6; }
-
-                /* TƯƠNG THÍCH MÀN 640x240 */
                 @media (max-width: 700px) {
-                    body {
-                        font-size: 13px; /* Đã hạ xuống 13px cho an toàn */
-                    }
-                    .container {
-                        gap: 5px;
-                    }
+                    body { font-size: 13px; }
+                    .container { gap: 5px; }
                     .s { margin: 0 2px; }
                 }
             </style></head>
