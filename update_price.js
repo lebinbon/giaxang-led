@@ -15,7 +15,7 @@ async function updatePrice() {
         console.log("🚀 Khởi động logic: Ưu tiên AppSheet -> Backup Webgia...");
 
         let v1 = { p95: "0", do001: "0", do05: "0" };
-        let v2 = { p95: "0", do001: "0", do05: "0" }; // Dành cho V2: E10 RON 95-III
+        let v2 = { p95: "0", do001: "0", do05: "0" };
         let v3 = { p95: "0", do001: "0", do05: "0" };
 
         // --- BƯỚC 1: LẤY DỮ LIỆU TỪ APPSHEET ---
@@ -46,7 +46,6 @@ async function updatePrice() {
                     }
                 }
             });
-            console.log("✅ Đã kiểm tra xong AppSheet.");
         } catch (e) { console.log("Lỗi đọc Sheets"); }
 
         // --- BƯỚC 2: KIỂM TRA WEB GIA ---
@@ -57,15 +56,19 @@ async function updatePrice() {
                 const row = $(el).text().toUpperCase();
                 const m = $(el).text().match(/(\d{2}\.\d{3})/g);
                 if (m && m.length >= 2) {
-                    // Giá 95-V cho V1, V3
-                    if (row.includes('95-V')) { 
+                    // Lấy giá 95-III cho V1
+                    if (row.includes('95-III') && !row.includes('E10')) { 
                         if (v1.p95 === "0") v1.p95 = m[0]; 
+                    }
+                    // Lấy giá 95-V cho V3
+                    if (row.includes('95-V')) { 
                         if (v3.p95 === "0") v3.p95 = m[2] || m[0]; 
                     }
-                    // GIÁ E10 RON 95-III RIÊNG CHO V2
+                    // Lấy giá E10 cho V2
                     if (row.includes('E10 RON 95-III')) {
                         if (v2.p95 === "0") v2.p95 = m[1]; 
                     }
+                    // Dầu...
                     if (row.includes('0,001S-V')) { 
                         if (v1.do001 === "0") v1.do001 = m[0]; 
                         if (v2.do001 === "0") v2.do001 = m[1]; 
@@ -76,7 +79,6 @@ async function updatePrice() {
                     }
                 }
             });
-            console.log("✅ Đã lấy dữ liệu dự phòng từ Webgia.");
         } catch (e) { console.log("Lỗi Webgia"); }
 
         // --- BƯỚC 3: XUẤT FILE HTML ---
@@ -90,38 +92,19 @@ async function updatePrice() {
             const fp = finalPrice(p);
             return `<!DOCTYPE html><html><head><meta charset='utf-8'><style>
                 body {
-                    margin: 0;
-                    background: transparent;
-                    color: #FFD700;
+                    margin: 0; background: transparent; color: #FFD700;
                     font-family: "Arial Narrow", Arial, sans-serif;
-                    font-size: 24px;
-                    font-weight: bold;
-                    overflow: hidden;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    height: 100vh;
-                    text-shadow: 1px 1px 2px #000;
+                    font-size: 24px; font-weight: bold; overflow: hidden;
+                    display: flex; align-items: center; justify-content: center;
+                    height: 100vh; text-shadow: 1px 1px 2px #000;
                 }
-                .container {
-                    display: flex;
-                    flex-direction: row;
-                    align-items: center;
-                    white-space: nowrap;
-                    gap: 10px;
-                }
+                .container { display: flex; flex-direction: row; align-items: center; white-space: nowrap; gap: 10px; }
                 .l { color: #FFFFFF; }
                 .v { color: #00FF00; margin-left: 5px; }
                 .s { color: #FFFFFF; opacity: 0.6; }
-
-                /* TƯƠNG THÍCH MÀN 640x240 */
                 @media (max-width: 700px) {
-                    body {
-                        font-size: 13px; /* Đã hạ xuống 13px cho an toàn */
-                    }
-                    .container {
-                        gap: 5px;
-                    }
+                    body { font-size: 13px; }
+                    .container { gap: 5px; }
                     .s { margin: 0 2px; }
                 }
             </style></head>
@@ -137,11 +120,12 @@ async function updatePrice() {
             </body></html>`;
         };
 
-        fs.writeFileSync('giaxang_v1.html', draw(v1, 'XĂNG RON 95-V'));
+        // PHÂN CHIA NHÃN RIÊNG BIỆT CHO TỪNG VÙNG Ở ĐÂY:
+        fs.writeFileSync('giaxang_v1.html', draw(v1, 'XĂNG RON 95-III'));
         fs.writeFileSync('giaxang_v2.html', draw(v2, 'XĂNG E10 RON 95-III'));
         fs.writeFileSync('giaxang_v3.html', draw(v3, 'XĂNG RON 95-V'));
         
-        console.log("🚀 HOÀN TẤT CẬP NHẬT!");
+        console.log("🚀 ĐÃ CẬP NHẬT: V1 (95-III), V2 (E10), V3 (95-V)");
     } catch (e) { console.error(e.message); }
 }
 updatePrice();
