@@ -64,7 +64,7 @@ async function updatePrice() {
                     }
                     // Lấy giá E10 RON 95-V cho V3
                     if (row.includes('E10 RON 95-V')) { 
-                        if (v3.p95 === "0") v3.p95 = m[2] || m[0]; 
+                        if (v3.p95 === "0") v3.p95 = m[2]|| m[0]; 
                     }
                     
                     // Dầu...
@@ -81,7 +81,7 @@ async function updatePrice() {
             console.log("✅ Đã lấy dữ liệu dự phòng từ Webgia.");
         } catch (e) { console.log("Lỗi Webgia"); }
 
-        // --- BƯỚC 3: XUẤT FILE HTML (Đã fix lỗi tràn chữ bằng clamp & vw) ---
+        // --- BƯỚC 3: XUẤT FILE HTML (Đã tăng kích thước chữ tối đa phủ kín màn LED) ---
         const finalPrice = (p) => ({
             p95: p.p95 === "0" ? "00.000" : p.p95,
             do001: p.do001 === "0" ? "00.000" : p.do001,
@@ -94,18 +94,18 @@ async function updatePrice() {
                 body {
                     margin: 0; background: transparent; color: #FFD700;
                     font-family: "Arial Narrow", Arial, sans-serif;
-                    font-size: clamp(10px, 1.9vw, 24px); /* Tự động co giãn theo khung màn hình */
+                    font-size: clamp(14px, 2.6vw, 36px); /* Tăng scale to hơn, tận dụng tối đa không gian màn LED */
                     font-weight: bold; overflow: hidden;
                     display: flex; align-items: center; justify-content: center;
                     height: 100vh; text-shadow: 1px 1px 2px #000;
                 }
                 .container { 
                     display: flex; flex-direction: row; align-items: center; 
-                    white-space: nowrap; gap: 0.8vw; width: 100%; justify-content: center; 
+                    white-space: nowrap; gap: 0.6vw; width: 100%; justify-content: center; 
                 }
                 .l { color: #FFFFFF; }
-                .v { color: #00FF00; margin-left: 0.3vw; }
-                .s { color: #FFFFFF; opacity: 0.6; margin: 0 0.3vw; }
+                .v { color: #00FF00; margin-left: 0.2vw; }
+                .s { color: #FFFFFF; opacity: 0.6; margin: 0 0.2vw; }
             </style></head>
             <body>
                 <div class="container">
