@@ -2,18 +2,19 @@
                 body {
                     margin: 0; background: transparent; color: #FFD700;
                     font-family: "Arial Narrow", Arial, sans-serif;
-                    font-size: clamp(14px, 2.6vw, 36px); /* Tăng scale to hơn, tận dụng tối đa không gian màn LED */
-                    font-weight: bold; overflow: hidden;
+                    font-size: 21px; font-weight: bold; overflow: hidden; /* Đã co nhẹ font từ 24px xuống 21px để hết tràn chữ */
                     display: flex; align-items: center; justify-content: center;
                     height: 100vh; text-shadow: 1px 1px 2px #000;
                 }
-                .container { 
-                    display: flex; flex-direction: row; align-items: center; 
-                    white-space: nowrap; gap: 0.6vw; width: 100%; justify-content: center; 
-                }
+                .container { display: flex; flex-direction: row; align-items: center; white-space: nowrap; gap: 7px; } /* Thu hẹp khoảng cách gap từ 10px xuống 7px */
                 .l { color: #FFFFFF; }
-                .v { color: #00FF00; margin-left: 0.2vw; }
-                .s { color: #FFFFFF; opacity: 0.6; margin: 0 0.2vw; }
+                .v { color: #00FF00; margin-left: 4px; }
+                .s { color: #FFFFFF; opacity: 0.6; }
+                @media (max-width: 700px) {
+                    body { font-size: 13px; }
+                    .container { gap: 5px; }
+                    .s { margin: 0 2px; }
+                }
             </style></head>
             <body>
                 <div class="container">
