@@ -81,7 +81,7 @@ async function updatePrice() {
             console.log("✅ Đã lấy dữ liệu dự phòng từ Webgia.");
         } catch (e) { console.log("Lỗi Webgia"); }
 
-        // --- BƯỚC 3: XUẤT FILE HTML ---
+        // --- BƯỚC 3: XUẤT FILE HTML (Đã fix lỗi tràn chữ bằng clamp & vw) ---
         const finalPrice = (p) => ({
             p95: p.p95 === "0" ? "00.000" : p.p95,
             do001: p.do001 === "0" ? "00.000" : p.do001,
@@ -94,19 +94,18 @@ async function updatePrice() {
                 body {
                     margin: 0; background: transparent; color: #FFD700;
                     font-family: "Arial Narrow", Arial, sans-serif;
-                    font-size: 24px; font-weight: bold; overflow: hidden;
+                    font-size: clamp(10px, 1.9vw, 24px); /* Tự động co giãn theo khung màn hình */
+                    font-weight: bold; overflow: hidden;
                     display: flex; align-items: center; justify-content: center;
                     height: 100vh; text-shadow: 1px 1px 2px #000;
                 }
-                .container { display: flex; flex-direction: row; align-items: center; white-space: nowrap; gap: 10px; }
-                .l { color: #FFFFFF; }
-                .v { color: #00FF00; margin-left: 5px; }
-                .s { color: #FFFFFF; opacity: 0.6; }
-                @media (max-width: 700px) {
-                    body { font-size: 13px; }
-                    .container { gap: 5px; }
-                    .s { margin: 0 2px; }
+                .container { 
+                    display: flex; flex-direction: row; align-items: center; 
+                    white-space: nowrap; gap: 0.8vw; width: 100%; justify-content: center; 
                 }
+                .l { color: #FFFFFF; }
+                .v { color: #00FF00; margin-left: 0.3vw; }
+                .s { color: #FFFFFF; opacity: 0.6; margin: 0 0.3vw; }
             </style></head>
             <body>
                 <div class="container">
@@ -120,7 +119,7 @@ async function updatePrice() {
             </body></html>`;
         };
 
-        // ĐÃ SỬA TÊN MẶT HÀNG PHÙ HỢP CHO TỪNG FILE ĐẦU RA:
+        // Xuất file cho cả 3 vùng
         fs.writeFileSync('giaxang_v1.html', draw(v1, 'XĂNG E10 RON 95-III'));
         fs.writeFileSync('giaxang_v2.html', draw(v2, 'XĂNG E10 RON 95-III'));
         fs.writeFileSync('giaxang_v3.html', draw(v3, 'XĂNG E10 RON 95-V'));
